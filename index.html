@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELMA — Daily Ritual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --oat: #F4EDE2;
+    --oat-deep: #EAE0CF;
+    --wine: #6E2A3A;
+    --wine-deep: #4A1C28;
+    --blush: #E7CFC0;
+    --sage: #7C8A6B;
+    --ink: #2A211D;
+    --ink-soft: #6B5F56;
+    --line: rgba(42,33,29,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--oat);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .serif{font-family:'Fraunces',serif;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:28px 6vw;
+    position:sticky;top:0;z-index:50;
+    background:rgba(244,237,226,0.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    font-family:'Fraunces',serif;
+    font-size:1.5rem;
+    font-weight:500;
+    letter-spacing:-0.02em;
+    color:var(--wine-deep);
+  }
+  .nav-links{display:flex;gap:36px;font-size:0.85rem;letter-spacing:0.02em;color:var(--ink-soft);}
+  .nav-links a{transition:color .2s;}
+  .nav-links a:hover{color:var(--wine);}
+  .nav-cta{
+    background:var(--wine-deep);color:var(--oat);
+    padding:10px 22px;border-radius:100px;
+    font-size:0.82rem;letter-spacing:0.02em;font-weight:500;
+    transition:background .2s;
+  }
+  .nav-cta:hover{background:var(--wine);}
+  @media (max-width:800px){.nav-links{display:none;}}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    display:grid;grid-template-columns:1.1fr 1fr;
+    align-items:center;
+    min-height:88vh;
+    padding:0 6vw;
+    gap:40px;
+  }
+  .hero-eyebrow{
+    font-size:0.78rem;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--sage);font-weight:600;margin-bottom:22px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .hero-eyebrow::before{content:'';width:22px;height:1px;background:var(--sage);}
+  .hero h1{
+    font-size:clamp(2.6rem,4.6vw,4.4rem);
+    line-height:1.02;
+    font-weight:400;
+    letter-spacing:-0.02em;
+    color:var(--wine-deep);
+    max-width:11ch;
+  }
+  .hero h1 em{font-style:italic;font-weight:300;color:var(--wine);}
+  .hero p{
+    margin-top:26px;
+    font-size:1.08rem;line-height:1.6;
+    color:var(--ink-soft);
+    max-width:38ch;
+  }
+  .hero-actions{display:flex;gap:16px;margin-top:38px;align-items:center;}
+  .btn-primary{
+    background:var(--wine-deep);color:var(--oat);
+    padding:16px 32px;border-radius:100px;
+    font-size:0.92rem;font-weight:500;
+    transition:transform .2s, background .2s;
+    display:inline-block;
+  }
+  .btn-primary:hover{background:var(--wine);transform:translateY(-1px);}
+  .btn-secondary{
+    font-size:0.88rem;color:var(--ink);font-weight:500;
+    border-bottom:1px solid var(--ink);padding-bottom:2px;
+  }
+  .hero-visual{
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    height:70vh;
+  }
+  .pack{
+    width:180px;height:420px;
+    background:linear-gradient(165deg, var(--wine) 0%, var(--wine-deep) 60%);
+    border-radius:14px;
+    position:relative;
+    box-shadow:0 40px 80px -20px rgba(74,28,40,0.35);
+    transform:rotate(-4deg);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:60px;
+  }
+  .pack::before{
+    content:'';
+    position:absolute;top:0;left:0;right:0;height:70px;
+    background:repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(244,237,226,0.15) 6px, rgba(244,237,226,0.15) 7px);
+    border-radius:14px 14px 0 0;
+  }
+  .pack-mark{
+    font-family:'Fraunces',serif;color:var(--oat);
+    font-size:1.4rem;letter-spacing:-0.01em;
+  }
+  .pack-sub{
+    font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;
+    color:rgba(244,237,226,0.6);margin-top:8px;
+  }
+  .ring{
+    position:absolute;width:340px;height:340px;border-radius:50%;
+    border:1px solid rgba(110,42,58,0.18);
+  }
+  .ring2{width:420px;height:420px;border-color:rgba(110,42,58,0.1);}
+  .float-badge{
+    position:absolute;background:var(--oat);border:1px solid var(--line);
+    border-radius:100px;padding:10px 18px;font-size:0.78rem;font-weight:500;
+    box-shadow:0 12px 24px -8px rgba(42,33,29,0.15);
+  }
+  .fb1{top:8%;right:2%;}
+  .fb2{bottom:12%;left:0%;}
+
+  /* ---------- MARQUEE ---------- */
+  .marquee-strip{
+    background:var(--wine-deep);color:var(--blush);
+    padding:16px 0;overflow:hidden;white-space:nowrap;
+  }
+  .marquee-strip span{
+    display:inline-block;font-size:0.82rem;letter-spacing:0.06em;
+    padding:0 28px;font-weight:500;
+  }
+  .marquee-track{display:inline-block;animation:scroll 28s linear infinite;}
+  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* ---------- PILLARS ---------- */
+  .section{padding:120px 6vw;}
+  .section-head{max-width:640px;margin:0 auto 64px;text-align:center;}
+  .section-eyebrow{
+    font-size:0.78rem;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--sage);font-weight:600;margin-bottom:16px;
+  }
+  .section-head h2{
+    font-size:clamp(2rem,3.4vw,2.8rem);font-weight:400;
+    color:var(--wine-deep);letter-spacing:-0.01em;line-height:1.15;
+  }
+  .pillars{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  }
+  .pillar{background:var(--oat);padding:48px 36px;transition:background .25s;}
+  .pillar:hover{background:var(--oat-deep);}
+  .pillar-num{
+    font-family:'Fraunces',serif;font-style:italic;font-size:1rem;
+    color:var(--sage);margin-bottom:24px;
+  }
+  .pillar h3{
+    font-family:'Fraunces',serif;font-weight:500;font-size:1.5rem;
+    color:var(--wine-deep);margin-bottom:14px;letter-spacing:-0.01em;
+  }
+  .pillar p{font-size:0.94rem;line-height:1.6;color:var(--ink-soft);}
+  @media (max-width:800px){.pillars{grid-template-columns:1fr;}}
+
+  /* ---------- RITUAL / HOW-TO ---------- */
+  .ritual{
+    background:var(--wine-deep);color:var(--oat);
+    border-radius:28px;margin:0 6vw;padding:90px 6vw;
+    display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;
+  }
+  .ritual-copy .section-eyebrow{color:var(--blush);}
+  .ritual-copy h2{
+    font-family:'Fraunces',serif;font-weight:400;font-size:clamp(1.9rem,3vw,2.6rem);
+    line-height:1.15;margin-bottom:24px;letter-spacing:-0.01em;
+  }
+  .ritual-copy p{color:rgba(244,237,226,0.75);line-height:1.7;font-size:1rem;max-width:42ch;}
+  .steps{display:flex;flex-direction:column;gap:0;}
+  .step{
+    display:flex;gap:20px;padding:22px 0;
+    border-bottom:1px solid rgba(244,237,226,0.15);
+  }
+  .step:last-child{border-bottom:none;}
+  .step-index{font-family:'Fraunces',serif;font-style:italic;color:var(--blush);font-size:1.1rem;width:28px;}
+  .step-text h4{font-weight:500;font-size:0.98rem;margin-bottom:4px;}
+  .step-text p{font-size:0.86rem;color:rgba(244,237,226,0.65);line-height:1.5;}
+  @media (max-width:800px){.ritual{grid-template-columns:1fr;padding:60px 8vw;}}
+
+  /* ---------- INGREDIENTS ---------- */
+  .ingredients{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:start;}
+  .ing-visual{
+    aspect-ratio:1/1.05;border-radius:24px;
+    background:radial-gradient(circle at 30% 20%, var(--blush), var(--oat-deep) 70%);
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .ing-visual .glass{
+    width:120px;height:150px;border-radius:0 0 40px 40px / 0 0 30px 30px;
+    background:linear-gradient(180deg, rgba(110,42,58,0.15), rgba(110,42,58,0.35));
+    border:1px solid rgba(110,42,58,0.25);
+    position:relative;overflow:hidden;
+  }
+  .ing-visual .glass::after{
+    content:'';position:absolute;bottom:0;left:0;right:0;height:55%;
+    background:linear-gradient(180deg, var(--blush), var(--wine));
+    opacity:0.85;
+  }
+  .ing-list{display:flex;flex-direction:column;}
+  .ing-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:22px 0;border-bottom:1px solid var(--line);
+  }
+  .ing-row:first-child{padding-top:0;}
+  .ing-name{font-family:'Fraunces',serif;font-size:1.15rem;color:var(--wine-deep);}
+  .ing-desc{font-size:0.86rem;color:var(--ink-soft);max-width:32ch;text-align:right;}
+
+  /* ---------- CTA / EMAIL ---------- */
+  .cta-section{
+    text-align:center;padding:140px 6vw;
+  }
+  .cta-section h2{
+    font-family:'Fraunces',serif;font-weight:400;font-size:clamp(2.2rem,4vw,3.4rem);
+    color:var(--wine-deep);letter-spacing:-0.02em;max-width:16ch;margin:0 auto 20px;
+  }
+  .cta-section p{color:var(--ink-soft);font-size:1rem;margin-bottom:40px;}
+  .email-form{
+    display:flex;max-width:420px;margin:0 auto;
+    border:1px solid var(--ink);border-radius:100px;overflow:hidden;
+  }
+  .email-form input{
+    flex:1;border:none;background:transparent;padding:16px 22px;
+    font-family:'Inter',sans-serif;font-size:0.92rem;outline:none;color:var(--ink);
+  }
+  .email-form button{
+    background:var(--wine-deep);color:var(--oat);border:none;
+    padding:0 28px;font-size:0.88rem;font-weight:500;cursor:pointer;
+    transition:background .2s;
+  }
+  .email-form button:hover{background:var(--wine);}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:var(--wine-deep);color:rgba(244,237,226,0.6);
+    padding:60px 6vw 30px;font-size:0.82rem;
+  }
+  .footer-top{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;
+    padding-bottom:40px;border-bottom:1px solid rgba(244,237,226,0.12);
+    margin-bottom:24px;
+  }
+  .footer-logo{font-family:'Fraunces',serif;color:var(--oat);font-size:1.3rem;}
+  .footer-links{display:flex;gap:36px;}
+  .footer-links a:hover{color:var(--oat);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">elma</div>
+  <div class="nav-links">
+    <a href="#pillars">The blend</a>
+    <a href="#ritual">Ritual</a>
+    <a href="#ingredients">Ingredients</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a class="nav-cta" href="#cta">Shop Now</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-copy">
+    <div class="hero-eyebrow">Hydration · Beauty · Energy</div>
+    <h1>One glass, <em>every</em> morning, no compromise.</h1>
+    <p>ELMA is a daily powder that hydrates, supports skin from within, and clears your head — dissolved in seconds, before your day gets loud.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#cta">Try ELMA — $42/box</a>
+      <a class="btn-secondary" href="#ingredients">See what's inside</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="ring ring2"></div>
+    <div class="ring"></div>
+    <div class="pack">
+      <div class="pack-mark">elma</div>
+      <div class="pack-sub">daily blend</div>
+    </div>
+    <div class="float-badge fb1">✓ Third-party tested</div>
+    <div class="float-badge fb2">4.9 · 2,300 rituals</div>
+  </div>
+</section>
+
+<div class="marquee-strip">
+  <div class="marquee-track">
+    <span>HYDRATION</span><span>·</span><span>BEAUTY-FROM-WITHIN</span><span>·</span><span>CLEAN ENERGY</span><span>·</span><span>ADAPTOGENS</span><span>·</span>
+    <span>HYDRATION</span><span>·</span><span>BEAUTY-FROM-WITHIN</span><span>·</span><span>CLEAN ENERGY</span><span>·</span><span>ADAPTOGENS</span><span>·</span>
+  </div>
+</div>
+
+<section class="section" id="pillars">
+  <div class="section-head">
+    <div class="section-eyebrow">Why three-in-one</div>
+    <h2>Everything your morning stack was missing, minus the cabinet full of bottles.</h2>
+  </div>
+  <div class="pillars">
+    <div class="pillar">
+      <div class="pillar-num">i.</div>
+      <h3>Hydration</h3>
+      <p>A clinical electrolyte ratio — sodium, potassium, magnesium — built to outperform water alone, without the sugar load of sports drinks.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">ii.</div>
+      <h3>Beauty, from within</h3>
+      <p>Collagen peptides, hyaluronic acid, and vitamin C working beneath the surface — skin support that starts in your glass, not your cabinet.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">iii.</div>
+      <h3>Clean energy</h3>
+      <p>A gentle lift from adaptogens, not stimulants — steady focus that shows up an hour in and doesn't leave you crashing by 2pm.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ritual" id="ritual">
+  <div class="ritual-copy">
+    <div class="section-eyebrow">The ritual</div>
+    <h2>Thirty seconds, before anything else demands your attention.</h2>
+    <p>ELMA is designed to be the first thing you reach for — not another app, not your phone. Just water, a stir, and a minute that's yours.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-index">01</div>
+      <div class="step-text"><h4>Tear one stick</h4><p>Pre-measured, made for a full glass of water or your morning routine of choice.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-index">02</div>
+      <div class="step-text"><h4>Stir for 20 seconds</h4><p>Dissolves clean — no grit, no film, no separating.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-index">03</div>
+      <div class="step-text"><h4>Drink before coffee</h4><p>Hydrate first. Everything else works better after.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="ingredients">
+  <div class="section-head" style="margin-bottom:70px;">
+    <div class="section-eyebrow">What's inside</div>
+    <h2>No fillers. No proprietary blends hiding the dose.</h2>
+  </div>
+  <div class="ingredients">
+    <div class="ing-visual"><div class="glass"></div></div>
+    <div class="ing-list">
+      <div class="ing-row">
+        <span class="ing-name">Electrolyte complex</span>
+        <span class="ing-desc">Sodium, potassium & magnesium in a clinically-informed ratio</span>
+      </div>
+      <div class="ing-row">
+        <span class="ing-name">Marine collagen peptides</span>
+        <span class="ing-desc">For skin elasticity, dissolves clean in cold water</span>
+      </div>
+      <div class="ing-row">
+        <span class="ing-name">Hyaluronic acid</span>
+        <span class="ing-desc">Supports skin hydration from within</span>
+      </div>
+      <div class="ing-row">
+        <span class="ing-name">Ashwagandha (KSM-66)</span>
+        <span class="ing-desc">Adaptogen for steady, stimulant-free focus</span>
+      </div>
+      <div class="ing-row">
+        <span class="ing-name">Vitamin C + biotin</span>
+        <span class="ing-desc">Collagen synthesis support, skin & hair</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section" id="cta">
+  <h2>Be first to try ELMA.</h2>
+  <p>Join the list for early access and founding-member pricing.</p>
+  <form class="email-form" onsubmit="return false;">
+    <input type="email" placeholder="you@email.com" required>
+    <button type="submit">Notify me</button>
+  </form>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-logo">elma</div>
+    <div class="footer-links">
+      <a href="#pillars">The blend</a>
+      <a href="#ingredients">Ingredients</a>
+      <a href="#">Subscribe & save</a>
+      <a href="#">FAQ</a>
+    </div>
+  </div>
+  <div>© 2026 ELMA. A daily ritual, reconsidered.</div>
+</footer>
+
+</body>
+</html>
