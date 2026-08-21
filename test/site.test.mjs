@@ -25,6 +25,7 @@ async function load(page, url) {
   vc.on('error', (...a) => errs.push(a.join(' ')));
   const dom = new JSDOM(readFileSync(path.join(SITE, page), 'utf8'), {
     runScripts: 'outside-only', url: 'http://localhost:8000/' + (url || page), virtualConsole: vc,
+    pretendToBeVisual: true, // motion.js needs requestAnimationFrame
   });
   const w = dom.window;
   // shared localStorage across "page loads" so cart persistence is exercised
@@ -33,11 +34,22 @@ async function load(page, url) {
     setItem: (k, v) => { store[k] = String(v); },
     removeItem: k => { delete store[k]; },
   }, configurable: true });
+  // jsdom 27 ships no matchMedia; every target browser has one. Default to a
+  // desktop pointer with motion allowed.
+  if (!w.matchMedia) {
+    Object.defineProperty(w, 'matchMedia', { value: q => ({
+      media: q,
+      matches: /hover: hover|pointer: fine/.test(q) && !/reduce/.test(q),
+      addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {},
+    }), configurable: true });
+  }
   if (w.document.readyState === 'loading') {
     await new Promise(res => w.document.addEventListener('DOMContentLoaded', res));
   }
+  // Same order the pages load them in: products, site, motion, then inline.
   w.eval(readFileSync(path.join(SITE, 'assets/js/products.js'), 'utf8'));
   w.eval(readFileSync(path.join(SITE, 'assets/js/site.js'), 'utf8'));
+  w.eval(readFileSync(path.join(SITE, 'assets/js/motion.js'), 'utf8'));
   for (const s of w.document.querySelectorAll('body script:not([src])')) w.eval(s.textContent);
   return { w, d: w.document, errs };
 }

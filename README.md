@@ -49,16 +49,59 @@ Then visit http://localhost:8000
 Checkout is front-end only — no payment is processed and nothing is sent to a
 server. Every page says so.
 
+## Motion
+
+Ported from the [beUI motion set](https://beui.dev/components/motion). beUI ships
+React + Motion + Tailwind components; this site is vanilla, so what crossed over
+is the **values** — easing curves, spring constants, enter/exit transforms — not
+the code.
+
+| Surface | beUI source | What it does here |
+| --- | --- | --- |
+| Scroll reveal | `ScrollReveal` | Sections, cards, and rows fade up 16px from an 8px blur as they enter view; siblings stagger 60–80ms |
+| Hero headline | `TextReveal` | Split per word, 90ms apart, rising from 40% with a 12px blur |
+| Buttons & chips | `Button` | Hover 1.02, press 0.93, fast on the way down and spring on the way back up |
+| Product / PDP media | `TiltCard` | 6° cursor tilt with a tracked glare, mouse only |
+| FAQ | `BouncyAccordion` | Real height animation with a bounced spring, plus a row tint |
+| Toasts | `AnimatedToastStack` | Up to 4 stack with depth falloff instead of replacing each other |
+| Nav | `ScrollProgress` | 2px spring-damped progress bar |
+| Cart total | `Number` | Counts to the new total rather than snapping |
+
+Two things worth knowing:
+
+- **The springs are solved, not eyeballed.** Each `--spring-*` token in
+  `motion.css` is the step response of a damped harmonic oscillator, computed
+  from beUI's published stiffness/damping/mass and sampled into a CSS `linear()`
+  curve. Bezier approximations sit behind an `@supports` guard for older engines.
+- **The old stylesheet ran every transition at `.2s`.** That is now a four-tier
+  scale — `--dur-micro` (120ms) for colour, `--dur-fast` (180ms) for
+  background/border, `--dur-base` (260ms) for panels, `--dur-reveal` (600ms) for
+  entrances — so small changes resolve faster than large ones.
+
+Everything degrades: `prefers-reduced-motion` drops to opacity-only, tilt and
+hover are gated behind `(hover: hover) and (pointer: fine)`, a missing
+`IntersectionObserver` shows content immediately, and because `motion.js` is what
+*adds* the reveal attributes, disabling JS leaves the page fully visible rather
+than stuck at opacity 0.
+
 ## Structure
 
 ```
 assets/
   css/styles.css      design tokens + all component styles
+  css/motion.css      motion tokens, solved spring curves, animated components
   js/products.js      catalogue data + inline SVG product artwork
   js/site.js          cart, shop, product, checkout, forms, nav
+  js/motion.js        reveal observer, text split, tilt, toast stack, counters
   favicon.svg
 test/site.test.mjs    62 end-to-end DOM tests
+test/motion.test.mjs  76 motion-layer tests
 ```
+
+`motion.js` loads after `site.js` and owns every animated surface. The coupling
+is three optional hooks — `ELMA.motion.toast`, `ELMA.motion.scan` (called after
+any re-render so injected nodes get wired), and the accordion's row state. Delete
+`motion.js` and the site still works; it just stops moving.
 
 To change the catalogue, edit `PRODUCTS` in `assets/js/products.js` — nothing else
 needs to change. Swapping it for a real API only means replacing `ELMA.products`
@@ -71,9 +114,18 @@ npm install    # jsdom, used only by the tests
 npm test
 ```
 
-62 assertions covering add-to-cart, filtering, sorting, quantity steppers, cart
-maths, promo codes, checkout validation, the confirmation flow, the accordion,
-form validation, and internal links.
+138 assertions. `site.test.mjs` (62) covers add-to-cart, filtering, sorting,
+quantity steppers, cart maths, promo codes, checkout validation, the
+confirmation flow, the accordion, form validation, and internal links.
+`motion.test.mjs` (76) covers the reveal observer and its fallbacks, stagger
+timing and its cap, the hero word split, the toast stack, the accordion
+rewrite, animated totals, and the CSS token contract.
+
+jsdom has no layout engine, so the motion tests assert **end states** — that
+content always resolves to visible and never strands behind a transition that
+cannot run. Appearance was verified separately in headless Chromium; note that
+headless defaults `prefers-reduced-motion` to `reduce` and reports
+`pointer: none`, so both need overriding to exercise the full-motion path.
 
 ## Source
 

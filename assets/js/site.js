@@ -133,9 +133,20 @@
   };
   ELMA.Cart = Cart;
 
+  /* ---------- motion hand-off ----------
+     motion.js loads after this file and owns every animated surface. Each
+     hook below is optional: with motion.js absent the site keeps working,
+     it just stops moving. */
+  function rescan(root) {
+    if (ELMA.motion && ELMA.motion.scan) ELMA.motion.scan(root || document);
+  }
+
   /* ---------- toast ---------- */
   var toastTimer = null;
   function toast(message) {
+    if (ELMA.motion && ELMA.motion.toast) { ELMA.motion.toast(message); return; }
+
+    // Fallback: single replaceable toast, no stack.
     var el = $('#toast');
     if (!el) {
       el = document.createElement('div');
@@ -283,6 +294,7 @@
       ? ids.map(function (id) { return ELMA.getProduct(id.trim()); }).filter(Boolean)
       : ELMA.products.slice(0, 4);
     grid.innerHTML = list.map(productCard).join('');
+    rescan(grid);
   }
 
   /* ---------- shop ---------- */
@@ -328,6 +340,7 @@
         ? list.map(productCard).join('')
         : '<div class="empty-state"><h3>Nothing in this shelf yet</h3>' +
           '<p>We are building this category out. Try “Everything” in the meantime.</p></div>';
+      rescan(grid);
 
       var url = new URL(window.location.href);
       if (activeCat === 'all') url.searchParams.delete('category');
@@ -442,6 +455,8 @@
       });
       related.innerHTML = pool.slice(0, 3).map(productCard).join('');
     }
+
+    rescan(document);
   }
 
   /* ---------- cart page ---------- */
@@ -468,7 +483,9 @@
         '<div class="summary-row"><span>Shipping</span><span>' +
           (t.shipping === 0 ? (empty ? '—' : 'Free') : money(t.shipping)) + '</span></div>' +
         '<div class="summary-row"><span>Estimated tax</span><span>' + money(t.tax) + '</span></div>' +
-        '<div class="summary-row total"><span>Total</span><span>' + money(t.total) + '</span></div>' +
+        '<div class="summary-row total"><span>Total</span>' +
+          '<span data-number="cart-total" data-number-format="money" ' +
+            'data-number-value="' + t.total.toFixed(2) + '">' + money(t.total) + '</span></div>' +
         '<form class="promo-form" data-promo-form>' +
           '<input type="text" name="code" placeholder="Promo code" aria-label="Promo code" ' +
             'value="' + esc(t.promoCode || '') + '" autocomplete="off">' +
@@ -486,6 +503,7 @@
         '</p>';
 
       bindPromo();
+      rescan(summary);
     }
 
     function bindPromo() {
@@ -559,6 +577,7 @@
         initSteppers(root);
       }
 
+      rescan(root);
       renderSummary();
     }
 
@@ -628,9 +647,13 @@
         '<div class="summary-row"><span>Shipping</span><span>' +
           (t.shipping === 0 ? 'Free' : money(t.shipping)) + '</span></div>' +
         '<div class="summary-row"><span>Estimated tax</span><span>' + money(t.tax) + '</span></div>' +
-        '<div class="summary-row total"><span>Total</span><span>' + money(t.total) + '</span></div>' +
+        '<div class="summary-row total"><span>Total</span>' +
+          '<span data-number="checkout-total" data-number-format="money" ' +
+            'data-number-value="' + t.total.toFixed(2) + '">' + money(t.total) + '</span></div>' +
         '<p class="summary-note">This is a demo storefront — no card is charged and no ' +
         'payment details are transmitted anywhere.</p>';
+
+      rescan(summary);
     }
 
     var RULES = {
