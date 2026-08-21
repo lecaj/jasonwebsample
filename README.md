@@ -84,18 +84,66 @@ hover are gated behind `(hover: hover) and (pointer: fine)`, a missing
 *adds* the reveal attributes, disabling JS leaves the page fully visible rather
 than stuck at opacity 0.
 
+## Imagery
+
+The product shots are **rendered studio stills, not photographs.** They are
+generated from primitives by `tools/generate-images.py`, so they carry no
+licence encumbrance and no model release — and the site says as much rather
+than passing them off as a shoot.
+
+They exist to be replaced. Every shot is rendered at the exact aspect ratio,
+filename and derivative size a real photograph will use, so swapping in a
+client shoot is a drop-in: match the naming scheme below and no markup, CSS or
+JS changes anywhere in the site.
+
+```bash
+npm run images                       # re-render all eight products
+python3 tools/generate-images.py quiet-hour-serum   # or just one
+```
+
+Requires Pillow and ffmpeg — dev-time only. The site itself stays a
+build-free set of static HTML files.
+
+Three variants, because three art directions:
+
+```
+assets/img/products/<id>/square-{400,800}.{avif,webp,jpg}    1:1     framed
+assets/img/products/<id>/portrait-{600,1200}.{avif,webp,jpg} 1:1.05  framed
+assets/img/products/<id>/cutout-{300,600}.{webp,png}         1:2     alpha
+```
+
+**Framed** shots bake the backdrop into the pixels and fill their box — the
+shop grid, the PDP, the cart lines, the 1:1 story panels. The CSS gradient
+underneath is the same oat wash the render starts from, so it doubles as the
+loading placeholder. **Cutout** shots carry alpha and are used where the
+product floats rather than sits in a frame — currently the hero, where the
+bottle has to sit inside the rings.
+
+`ELMA.picture(product, variant, opts)` in `products.js` builds the `<picture>`:
+AVIF then WebP then a universal fallback, a `srcset` per format, and `sizes`
+from the caller since only the caller knows the slot's layout width. Every
+`<img>` ships explicit `width`/`height` so the grid reserves its space before
+a byte arrives — with eight tiles lazy-loading at once, that is the difference
+between a calm page and a jumping one. Only the hero and the PDP shot load
+eagerly; everything else defers.
+
+On a browser that takes AVIF the whole eight-tile shop grid is about 17 KB.
+
 ## Structure
 
 ```
 assets/
   css/styles.css      design tokens + all component styles
   css/motion.css      motion tokens, solved spring curves, animated components
-  js/products.js      catalogue data + inline SVG product artwork
+  js/products.js      catalogue data, alt text, and the <picture> builder
   js/site.js          cart, shop, product, checkout, forms, nav
   js/motion.js        reveal observer, text split, tilt, toast stack, counters
+  img/products/       generated product shots (see Imagery)
   favicon.svg
+tools/generate-images.py  renders every product shot and derivative
 test/site.test.mjs    62 end-to-end DOM tests
 test/motion.test.mjs  76 motion-layer tests
+test/images.test.mjs  26 imagery tests
 ```
 
 `motion.js` loads after `site.js` and owns every animated surface. The coupling
@@ -114,12 +162,18 @@ npm install    # jsdom, used only by the tests
 npm test
 ```
 
-138 assertions. `site.test.mjs` (62) covers add-to-cart, filtering, sorting,
+164 assertions. `site.test.mjs` (62) covers add-to-cart, filtering, sorting,
 quantity steppers, cart maths, promo codes, checkout validation, the
 confirmation flow, the accordion, form validation, and internal links.
 `motion.test.mjs` (76) covers the reveal observer and its fallbacks, stagger
 timing and its cap, the hero word split, the toast stack, the accordion
 rewrite, animated totals, and the CSS token contract.
+`images.test.mjs` (26) resolves every image URL the markup can produce against
+the files on disk — which is what catches a half-finished render — and pins the
+things that are cheap to break and expensive to notice: intrinsic sizes on
+every `<img>`, lazy everywhere except the two above-the-fold shots, format
+ordering, and alt discipline (decorative inside an already-labelled link,
+descriptive when standalone).
 
 jsdom has no layout engine, so the motion tests assert **end states** — that
 content always resolves to visible and never strands behind a transition that

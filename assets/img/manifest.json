@@ -1,0 +1,183 @@
+{
+  "generatedBy": "tools/generate-images.py",
+  "variants": {
+    "square": {
+      "widths": [
+        400,
+        800
+      ],
+      "formats": [
+        "avif",
+        "webp",
+        "jpg"
+      ]
+    },
+    "portrait": {
+      "widths": [
+        600,
+        1200
+      ],
+      "formats": [
+        "avif",
+        "webp",
+        "jpg"
+      ]
+    },
+    "cutout": {
+      "widths": [
+        300,
+        600
+      ],
+      "formats": [
+        "webp",
+        "png"
+      ]
+    }
+  },
+  "products": {
+    "morning-dew-cleanser": [
+      "assets/img/products/morning-dew-cleanser/cutout-300.png",
+      "assets/img/products/morning-dew-cleanser/cutout-300.webp",
+      "assets/img/products/morning-dew-cleanser/cutout-600.png",
+      "assets/img/products/morning-dew-cleanser/cutout-600.webp",
+      "assets/img/products/morning-dew-cleanser/portrait-1200.avif",
+      "assets/img/products/morning-dew-cleanser/portrait-1200.jpg",
+      "assets/img/products/morning-dew-cleanser/portrait-1200.webp",
+      "assets/img/products/morning-dew-cleanser/portrait-600.avif",
+      "assets/img/products/morning-dew-cleanser/portrait-600.jpg",
+      "assets/img/products/morning-dew-cleanser/portrait-600.webp",
+      "assets/img/products/morning-dew-cleanser/square-400.avif",
+      "assets/img/products/morning-dew-cleanser/square-400.jpg",
+      "assets/img/products/morning-dew-cleanser/square-400.webp",
+      "assets/img/products/morning-dew-cleanser/square-800.avif",
+      "assets/img/products/morning-dew-cleanser/square-800.jpg",
+      "assets/img/products/morning-dew-cleanser/square-800.webp"
+    ],
+    "soft-focus-toner": [
+      "assets/img/products/soft-focus-toner/cutout-300.png",
+      "assets/img/products/soft-focus-toner/cutout-300.webp",
+      "assets/img/products/soft-focus-toner/cutout-600.png",
+      "assets/img/products/soft-focus-toner/cutout-600.webp",
+      "assets/img/products/soft-focus-toner/portrait-1200.avif",
+      "assets/img/products/soft-focus-toner/portrait-1200.jpg",
+      "assets/img/products/soft-focus-toner/portrait-1200.webp",
+      "assets/img/products/soft-focus-toner/portrait-600.avif",
+      "assets/img/products/soft-focus-toner/portrait-600.jpg",
+      "assets/img/products/soft-focus-toner/portrait-600.webp",
+      "assets/img/products/soft-focus-toner/square-400.avif",
+      "assets/img/products/soft-focus-toner/square-400.jpg",
+      "assets/img/products/soft-focus-toner/square-400.webp",
+      "assets/img/products/soft-focus-toner/square-800.avif",
+      "assets/img/products/soft-focus-toner/square-800.jpg",
+      "assets/img/products/soft-focus-toner/square-800.webp"
+    ],
+    "quiet-hour-serum": [
+      "assets/img/products/quiet-hour-serum/cutout-300.png",
+      "assets/img/products/quiet-hour-serum/cutout-300.webp",
+      "assets/img/products/quiet-hour-serum/cutout-600.png",
+      "assets/img/products/quiet-hour-serum/cutout-600.webp",
+      "assets/img/products/quiet-hour-serum/portrait-1200.avif",
+      "assets/img/products/quiet-hour-serum/portrait-1200.jpg",
+      "assets/img/products/quiet-hour-serum/portrait-1200.webp",
+      "assets/img/products/quiet-hour-serum/portrait-600.avif",
+      "assets/img/products/quiet-hour-serum/portrait-600.jpg",
+      "assets/img/products/quiet-hour-serum/portrait-600.webp",
+      "assets/img/products/quiet-hour-serum/square-400.avif",
+      "assets/img/products/quiet-hour-serum/square-400.jpg",
+      "assets/img/products/quiet-hour-serum/square-400.webp",
+      "assets/img/products/quiet-hour-serum/square-800.avif",
+      "assets/img/products/quiet-hour-serum/square-800.jpg",
+      "assets/img/products/quiet-hour-serum/square-800.webp"
+    ],
+    "slow-light-vitamin-c": [
+      "assets/img/products/slow-light-vitamin-c/cutout-300.png",
+      "assets/img/products/slow-light-vitamin-c/cutout-300.webp",
+      "assets/img/products/slow-light-vitamin-c/cutout-600.png",
+      "assets/img/products/slow-light-vitamin-c/cutout-600.webp",
+      "assets/img/products/slow-light-vitamin-c/portrait-1200.avif",
+      "assets/img/products/slow-light-vitamin-c/portrait-1200.jpg",
+      "assets/img/products/slow-light-vitamin-c/portrait-1200.webp",
+      "assets/img/products/slow-light-vitamin-c/portrait-600.avif",
+      "assets/img/products/slow-light-vitamin-c/portrait-600.jpg",
+      "assets/img/products/slow-light-vitamin-c/portrait-600.webp",
+      "assets/img/products/slow-light-vitamin-c/square-400.avif",
+      "assets/img/products/slow-light-vitamin-c/square-400.jpg",
+      "assets/img/products/slow-light-vitamin-c/square-400.webp",
+      "assets/img/products/slow-light-vitamin-c/square-800.avif",
+      "assets/img/products/slow-light-vitamin-c/square-800.jpg",
+      "assets/img/products/slow-light-vitamin-c/square-800.webp"
+    ],
+    "night-ritual-retinal": [
+      "assets/img/products/night-ritual-retinal/cutout-300.png",
+      "assets/img/products/night-ritual-retinal/cutout-300.webp",
+      "assets/img/products/night-ritual-retinal/cutout-600.png",
+      "assets/img/products/night-ritual-retinal/cutout-600.webp",
+      "assets/img/products/night-ritual-retinal/portrait-1200.avif",
+      "assets/img/products/night-ritual-retinal/portrait-1200.jpg",
+      "assets/img/products/night-ritual-retinal/portrait-1200.webp",
+      "assets/img/products/night-ritual-retinal/portrait-600.avif",
+      "assets/img/products/night-ritual-retinal/portrait-600.jpg",
+      "assets/img/products/night-ritual-retinal/portrait-600.webp",
+      "assets/img/products/night-ritual-retinal/square-400.avif",
+      "assets/img/products/night-ritual-retinal/square-400.jpg",
+      "assets/img/products/night-ritual-retinal/square-400.webp",
+      "assets/img/products/night-ritual-retinal/square-800.avif",
+      "assets/img/products/night-ritual-retinal/square-800.jpg",
+      "assets/img/products/night-ritual-retinal/square-800.webp"
+    ],
+    "second-skin-cream": [
+      "assets/img/products/second-skin-cream/cutout-300.png",
+      "assets/img/products/second-skin-cream/cutout-300.webp",
+      "assets/img/products/second-skin-cream/cutout-600.png",
+      "assets/img/products/second-skin-cream/cutout-600.webp",
+      "assets/img/products/second-skin-cream/portrait-1200.avif",
+      "assets/img/products/second-skin-cream/portrait-1200.jpg",
+      "assets/img/products/second-skin-cream/portrait-1200.webp",
+      "assets/img/products/second-skin-cream/portrait-600.avif",
+      "assets/img/products/second-skin-cream/portrait-600.jpg",
+      "assets/img/products/second-skin-cream/portrait-600.webp",
+      "assets/img/products/second-skin-cream/square-400.avif",
+      "assets/img/products/second-skin-cream/square-400.jpg",
+      "assets/img/products/second-skin-cream/square-400.webp",
+      "assets/img/products/second-skin-cream/square-800.avif",
+      "assets/img/products/second-skin-cream/square-800.jpg",
+      "assets/img/products/second-skin-cream/square-800.webp"
+    ],
+    "daybreak-spf": [
+      "assets/img/products/daybreak-spf/cutout-300.png",
+      "assets/img/products/daybreak-spf/cutout-300.webp",
+      "assets/img/products/daybreak-spf/cutout-600.png",
+      "assets/img/products/daybreak-spf/cutout-600.webp",
+      "assets/img/products/daybreak-spf/portrait-1200.avif",
+      "assets/img/products/daybreak-spf/portrait-1200.jpg",
+      "assets/img/products/daybreak-spf/portrait-1200.webp",
+      "assets/img/products/daybreak-spf/portrait-600.avif",
+      "assets/img/products/daybreak-spf/portrait-600.jpg",
+      "assets/img/products/daybreak-spf/portrait-600.webp",
+      "assets/img/products/daybreak-spf/square-400.avif",
+      "assets/img/products/daybreak-spf/square-400.jpg",
+      "assets/img/products/daybreak-spf/square-400.webp",
+      "assets/img/products/daybreak-spf/square-800.avif",
+      "assets/img/products/daybreak-spf/square-800.jpg",
+      "assets/img/products/daybreak-spf/square-800.webp"
+    ],
+    "the-daily-ritual-set": [
+      "assets/img/products/the-daily-ritual-set/cutout-300.png",
+      "assets/img/products/the-daily-ritual-set/cutout-300.webp",
+      "assets/img/products/the-daily-ritual-set/cutout-600.png",
+      "assets/img/products/the-daily-ritual-set/cutout-600.webp",
+      "assets/img/products/the-daily-ritual-set/portrait-1200.avif",
+      "assets/img/products/the-daily-ritual-set/portrait-1200.jpg",
+      "assets/img/products/the-daily-ritual-set/portrait-1200.webp",
+      "assets/img/products/the-daily-ritual-set/portrait-600.avif",
+      "assets/img/products/the-daily-ritual-set/portrait-600.jpg",
+      "assets/img/products/the-daily-ritual-set/portrait-600.webp",
+      "assets/img/products/the-daily-ritual-set/square-400.avif",
+      "assets/img/products/the-daily-ritual-set/square-400.jpg",
+      "assets/img/products/the-daily-ritual-set/square-400.webp",
+      "assets/img/products/the-daily-ritual-set/square-800.avif",
+      "assets/img/products/the-daily-ritual-set/square-800.jpg",
+      "assets/img/products/the-daily-ritual-set/square-800.webp"
+    ]
+  }
+}
