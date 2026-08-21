@@ -60,7 +60,7 @@ console.log('\n— home —');
   const { w, d, errs } = await load('index.html');
   ok(errs.length === 0, 'no JS errors (' + errs.join('; ') + ')');
   ok(d.querySelectorAll('[data-featured-grid] .product-card').length === 4, 'renders 4 featured products');
-  ok(d.querySelector('#hero-art svg') && d.querySelector('#ingredient-art svg'), 'hero + ingredient artwork injected');
+  ok(d.querySelector('#hero-art img') && d.querySelector('#ingredient-art img'), 'hero + ingredient artwork injected');
   ok(d.querySelector('[data-nav-links] a[aria-current="page"]') === null, 'home: in-page anchors not mis-marked as current page');
 
   click(w, d.querySelector('[data-add-to-cart]'));
@@ -210,7 +210,7 @@ console.log('\n— faq / about / contact —');
 
   const about = await load('about.html');
   ok(about.errs.length === 0, 'about: no JS errors (' + about.errs.join('; ') + ')');
-  ok(about.d.querySelector('#story-art svg'), 'about artwork injected');
+  ok(about.d.querySelector('#story-art img'), 'about artwork injected');
 
   const c = await load('contact.html');
   ok(c.errs.length === 0, 'contact: no JS errors (' + c.errs.join('; ') + ')');

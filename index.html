@@ -186,7 +186,7 @@
   </div>
   <div class="footer-bottom">
     <div>© 2026 ELMA. A daily ritual, reconsidered.</div>
-    <div>Demo storefront — no orders are fulfilled and no payments are processed.</div>
+    <div>Demo storefront — no orders are fulfilled and no payments are processed. Product images are rendered stand-ins, not photographs.</div>
   </div>
 </footer>
 
@@ -194,8 +194,21 @@
 <script src="assets/js/site.js"></script>
 <script src="assets/js/motion.js"></script>
 <script>
-  document.getElementById('hero-art').innerHTML = ELMA.art('dropper');
-  document.getElementById('ingredient-art').innerHTML = ELMA.art('jar');
+  /* The hero bottle floats inside the rings, so it takes the alpha cutout —
+     and its 1:2 frame suits a tall dropper. It is also the LCP element, so it
+     loads eagerly at high priority.
+
+     The ingredient panel is a 1:1 box, so it takes the framed square shot
+     instead: a cutout would sit small inside it with dead space around. It is
+     well below the fold and defers. */
+  document.getElementById('hero-art').innerHTML = ELMA.picture(
+    ELMA.getProduct('quiet-hour-serum'), 'cutout',
+    { sizes: '(max-width:476px) 42vw, 200px', eager: true }
+  );
+  document.getElementById('ingredient-art').innerHTML = ELMA.picture(
+    ELMA.getProduct('second-skin-cream'), 'square',
+    { sizes: '(max-width:900px) 88vw, 44vw' }
+  );
 </script>
 </body>
 </html>

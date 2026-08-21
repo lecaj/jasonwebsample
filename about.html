@@ -148,13 +148,20 @@
   </div>
   <div class="footer-bottom">
     <div>© 2026 ELMA. A daily ritual, reconsidered.</div>
-    <div>Demo storefront — no orders are fulfilled and no payments are processed.</div>
+    <div>Demo storefront — no orders are fulfilled and no payments are processed. Product images are rendered stand-ins, not photographs.</div>
   </div>
 </footer>
 
 <script src="assets/js/products.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/motion.js"></script>
-<script>document.getElementById('story-art').innerHTML = ELMA.art('set');</script>
+<script>
+  /* The group shot is wide, so it gets the framed square variant that fills
+     this 1:1 panel — the 1:2 cutout would strand it in white space. */
+  document.getElementById('story-art').innerHTML = ELMA.picture(
+    ELMA.getProduct('the-daily-ritual-set'), 'square',
+    { sizes: '(max-width:900px) 88vw, 44vw' }
+  );
+</script>
 </body>
 </html>
