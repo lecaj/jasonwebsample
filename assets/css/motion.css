@@ -1,0 +1,434 @@
+/* ==========================================================================
+   ELMA — motion layer
+
+   Ported from the beUI motion set (https://beui.dev/components/motion).
+   beUI ships React + Motion + Tailwind; this site is vanilla, so what is
+   carried across is the *values*, not the code: the same easing curves,
+   the same spring constants, the same enter/exit transforms.
+
+   Springs are real spring solutions, not eyeballed beziers. Each
+   --spring-* token below is the step response of a damped harmonic
+   oscillator sampled to a CSS linear() curve, generated from beUI's
+   published stiffness/damping/mass (or duration/bounce) figures.
+   ========================================================================== */
+
+:root{
+  /* ---- easing ---- */
+  /* beUI EASE_OUT / EASE_IN_OUT, used verbatim across their components. */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:   cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- duration scale ----
+     The old stylesheet ran every single transition at .2s. These four tiers
+     replace it: the smaller the change, the faster it resolves. */
+  --dur-micro:  120ms;  /* colour only — link and text hovers */
+  --dur-fast:   180ms;  /* background / border swaps */
+  --dur-base:   260ms;  /* multi-property, panels, media */
+  --dur-slow:   420ms;  /* large surfaces */
+  --dur-reveal: 600ms;  /* beUI ScrollReveal duration */
+
+  /* ---- spring fallbacks ----
+     Approximations used where linear() is unsupported; the @supports block
+     below replaces them with the exact solved curves. */
+  --spring-press:     cubic-bezier(0.34, 1.4, 0.64, 1);
+  --spring-swap:      cubic-bezier(0.22, 1.2, 0.36, 1);
+  --spring-mouse:     cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-text:      cubic-bezier(0.16, 1, 0.3, 1);
+  --spring-progress:  cubic-bezier(0.33, 1, 0.68, 1);
+  --spring-toast:     cubic-bezier(0.22, 1.2, 0.36, 1);
+  --spring-acc-row:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-acc-open:  cubic-bezier(0.34, 1.5, 0.64, 1);
+  --spring-acc-close: cubic-bezier(0.34, 1.35, 0.64, 1);
+  --spring-chevron:   cubic-bezier(0.34, 1.45, 0.64, 1);
+
+  --spring-press-dur:     288ms;
+  --spring-swap-dur:      247ms;
+  --spring-mouse-dur:     307ms;
+  --spring-text-dur:      821ms;
+  --spring-progress-dur:  320ms;
+  --spring-toast-dur:     321ms;
+  --spring-acc-row-dur:   647ms;
+  --spring-acc-open-dur:  742ms;
+  --spring-acc-close-dur: 499ms;
+  --spring-chevron-dur:   434ms;
+
+  /* ---- beUI motion constants, kept as tokens so they stay honest ---- */
+  --reveal-y:    16px;  /* ScrollReveal slide distance */
+  --reveal-blur: 8px;   /* ScrollReveal entry blur */
+  --tilt-max:    6deg;  /* beUI default is 12deg — halved; see README */
+  --press-scale: 0.93;  /* beUI Button pressScale */
+}
+
+/* ==========================================================================
+   1. SCROLL REVEAL
+   beUI ScrollReveal: y 16px, blur 8px, 0.6s, EASE_OUT, 30% viewport
+   threshold, opacity-only under reduced motion.
+   ========================================================================== */
+
+[data-reveal]{
+  opacity:0;
+  transform:translate3d(0, var(--reveal-y), 0);
+  filter:blur(var(--reveal-blur));
+  transition:
+    opacity   var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms),
+    transform var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms),
+    filter    var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms);
+}
+/* Only hint the compositor while the element is still waiting to animate —
+   leaving will-change on permanently costs memory for no benefit. */
+[data-reveal="pending"]{will-change:opacity, transform, filter;}
+[data-reveal="in"]{
+  opacity:1;
+  transform:none;
+  filter:blur(0);
+}
+/* No JS, no hidden content: motion.js is what *adds* data-reveal, so with
+   scripting off nothing above ever matches and the page renders as written. */
+
+/* Product cards keep the reveal's opacity/blur timing but take the press
+   spring on transform, so the same property can also serve the hover lift
+   without hover inheriting a 600ms curve. */
+.product-card[data-reveal="in"]{
+  transition:
+    transform  var(--spring-press-dur) var(--spring-press),
+    box-shadow var(--dur-base) var(--ease-out),
+    opacity    var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms),
+    filter     var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms);
+}
+
+/* ==========================================================================
+   2. TEXT REVEAL (hero headline)
+   beUI TextReveal: 0.09s per word, blur 12px, y 40%, spring {140, 26, 1.2},
+   opacity 0.7s, filter 0.9s.
+   ========================================================================== */
+
+/* .text-reveal is applied to the heading in place — it must not change the
+   element's own display, only how its words behave. */
+.text-reveal .tr-word{
+  display:inline-block;
+  white-space:pre;
+  opacity:0;
+  transform:translate3d(0, 40%, 0);
+  filter:blur(12px);
+  transition:
+    transform var(--spring-text-dur) var(--spring-text) var(--tr-delay, 0ms),
+    opacity   700ms var(--ease-out) var(--tr-delay, 0ms),
+    filter    900ms var(--ease-out) var(--tr-delay, 0ms);
+}
+.text-reveal[data-reveal="in"] .tr-word{
+  opacity:1;
+  transform:none;
+  filter:blur(0);
+}
+
+/* ==========================================================================
+   3. PRESS / HOVER SYSTEM
+   beUI Button: hover 1.02, press 0.93, SPRING_PRESS {500, 30, 0.6}.
+   Hover is gated behind a real pointer exactly as beUI gates it, so touch
+   devices never get a stuck phantom hover state.
+   ========================================================================== */
+
+.btn-primary,
+.btn-outline,
+.nav-cta,
+.cart-button,
+.filter-chip,
+.email-form button,
+.promo-form button,
+.qty-stepper button,
+.nav-toggle{
+  transform:scale(var(--press, 1));
+  transition:
+    transform  var(--spring-press-dur) var(--spring-press),
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color      var(--dur-fast) var(--ease-out);
+}
+
+/* Press: fast and linear on the way down, spring on the way back up. The
+   asymmetry is what makes a button feel physical rather than rubbery. */
+.btn-primary:active,
+.btn-outline:active,
+.nav-cta:active,
+.cart-button:active,
+.email-form button:active,
+.promo-form button:active,
+.nav-toggle:active{
+  --press:0.97;   /* wide pill targets — 0.93 reads as a collapse at this width */
+  transition-duration:var(--dur-micro);
+  transition-timing-function:var(--ease-standard);
+}
+.filter-chip:active,
+.qty-stepper button:active{
+  --press:var(--press-scale);   /* compact controls take beUI's 0.93 as-is */
+  transition-duration:var(--dur-micro);
+  transition-timing-function:var(--ease-standard);
+}
+.btn-primary:disabled:active,
+.btn-primary[aria-disabled="true"]:active{--press:1;}
+
+@media (hover:hover) and (pointer:fine){
+  .btn-primary:hover:not(:disabled),
+  .nav-cta:hover,
+  .email-form button:hover,
+  .promo-form button:hover{--press:1.02;}
+  .filter-chip:hover,
+  .cart-button:hover{--press:1.03;}
+}
+
+/* Text-only hovers resolve at the micro tier — no transform, just colour. */
+.nav-links a,
+.footer-col a,
+.breadcrumb a,
+.cart-line-name,
+.link-danger,
+.acc-trigger{transition:color var(--dur-micro) var(--ease-out);}
+
+.pillar{transition:background var(--dur-base) var(--ease-out);}
+.field input,.field select,.field textarea{
+  transition:border-color var(--dur-fast) var(--ease-out),
+             box-shadow var(--dur-fast) var(--ease-out);
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  box-shadow:0 0 0 3px rgba(110,42,58,0.10);
+}
+
+/* ==========================================================================
+   4. TILT CARD
+   beUI TiltCard: perspective 1000px, SPRING_MOUSE {200, 15, 0.3}, glare as a
+   cursor-tracked radial gradient at 15% opacity. Max tilt halved from beUI's
+   12deg — at 12deg a product bottle reads as a novelty, at 6deg as depth.
+   ========================================================================== */
+
+/* Tilt is applied to the *media tile*, never to an element that scroll-reveal
+   also drives — one owner per transform property, or the two fight. That is
+   why .product-card gets the lift and .product-media gets the tilt. */
+.product-media,
+.pdp-media{
+  transform:
+    perspective(1000px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg));
+  transition:transform var(--spring-mouse-dur) var(--spring-mouse);
+}
+.product-media[data-tilting="true"],
+.pdp-media[data-tilting="true"]{will-change:transform;}
+
+/* Glare rides above the artwork but below the badge. */
+.product-media::after,
+.pdp-media::after{
+  content:'';position:absolute;inset:0;
+  border-radius:inherit;pointer-events:none;
+  opacity:0;
+  background:radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255,255,255,0.9), transparent 50%);
+  transition:opacity var(--dur-base) var(--ease-out);
+  z-index:2;
+}
+.product-media[data-tilting="true"]::after,
+.pdp-media[data-tilting="true"]::after{opacity:0.15;}
+.product-badge{z-index:3;}
+
+@media (hover:hover) and (pointer:fine){
+  .product-card:hover{transform:translate3d(0, -4px, 0);}
+}
+
+/* ==========================================================================
+   5. ACCORDION
+   beUI BouncyAccordion: spring row 0.55s/0.38 bounce, open 0.58s/0.32,
+   close 0.46s/0.26, chevron 0.42s/0.28, description 0.18s EASE_OUT.
+   Height uses the grid 0fr->1fr technique instead of beUI's measured
+   ResizeObserver height — same result, no layout read, no JS in the path.
+   ========================================================================== */
+
+.acc-item{
+  transition:background var(--spring-acc-row-dur) var(--spring-acc-row);
+}
+.acc-item[data-open="true"]{background:var(--oat-soft);}
+
+.acc-panel{
+  display:grid;
+  grid-template-rows:0fr;
+  visibility:hidden;
+  padding:0;
+  transition:
+    grid-template-rows var(--spring-acc-close-dur) var(--spring-acc-close),
+    opacity 180ms var(--ease-out),
+    visibility 0s linear var(--spring-acc-close-dur);
+  opacity:0;
+}
+.acc-panel[data-open="true"]{
+  grid-template-rows:1fr;
+  visibility:visible;
+  opacity:1;
+  transition:
+    grid-template-rows var(--spring-acc-open-dur) var(--spring-acc-open),
+    opacity 180ms var(--ease-out) 60ms,
+    visibility 0s;
+}
+/* The wrapper is injected by motion.js; it is what actually gets clipped. */
+.acc-panel > .acc-panel-inner{
+  overflow:hidden;
+  min-height:0;
+  padding:0 0 26px;
+}
+/* The global reset strips <p> margins, which left multi-paragraph answers
+   running together as one block. */
+.acc-panel-inner p + p{margin-top:0.9em;}
+
+/* beUI rotates a chevron 180deg; this mark is a plus, so the equivalent
+   gesture is the vertical stroke springing closed into a minus. */
+.acc-icon::after{
+  transition:transform var(--spring-chevron-dur) var(--spring-chevron);
+}
+
+/* ==========================================================================
+   6. SCROLL PROGRESS
+   beUI ScrollProgress: 2px bar, spring {120, 30, 0.6}.
+   ========================================================================== */
+
+.scroll-progress{
+  position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  transform-origin:0 50%;
+  transform:scaleX(var(--progress, 0));
+  background:linear-gradient(90deg, var(--wine), var(--sage));
+  transition:transform var(--spring-progress-dur) var(--spring-progress);
+  pointer-events:none;
+}
+
+/* Nav lifts onto a shadow once the page has moved — a scroll cue that costs
+   nothing and tells you the header is now floating over content. */
+nav.site-nav{
+  transition:
+    box-shadow var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+}
+nav.site-nav[data-scrolled="true"]{
+  box-shadow:0 8px 30px -12px rgba(42,33,29,0.18);
+  background:rgba(244,237,226,0.94);
+}
+
+/* ==========================================================================
+   7. TOAST STACK
+   beUI AnimatedToastStack: enter y 22px / scale 0.96 / blur 10px, exit x 32px
+   / scale 0.96 / blur 8px over 0.18s, spring {420, 34, 0.75}, max 4 visible,
+   auto-dismiss 4200ms.
+   ========================================================================== */
+
+.toast-stack{
+  position:fixed;left:50%;bottom:32px;
+  transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  z-index:100;pointer-events:none;
+  width:max-content;max-width:calc(100vw - 40px);
+}
+.toast-stack .toast{
+  position:static;
+  transform:translate3d(0, 22px, 0) scale(0.96);
+  opacity:0;
+  filter:blur(10px);
+  background:var(--wine-deep);color:var(--oat);
+  padding:15px 26px;border-radius:100px;font-size:0.88rem;
+  box-shadow:var(--shadow-lg);
+  text-align:center;pointer-events:auto;
+  transition:
+    transform var(--spring-toast-dur) var(--spring-toast),
+    opacity   var(--dur-base) var(--ease-out),
+    filter    var(--dur-base) var(--ease-out);
+}
+.toast-stack .toast[data-state="in"]{
+  transform:none;opacity:1;filter:blur(0);
+}
+.toast-stack .toast[data-state="out"]{
+  transform:translate3d(32px, 0, 0) scale(0.96);
+  opacity:0;filter:blur(8px);
+  transition-duration:180ms;
+  transition-timing-function:var(--ease-out);
+}
+/* Depth falloff on stacked toasts, newest at the bottom and fully lit. */
+.toast-stack .toast[data-depth="1"]{opacity:0.85;}
+.toast-stack .toast[data-depth="2"]{opacity:0.65;}
+.toast-stack .toast[data-depth="3"]{opacity:0.45;}
+.toast-stack .toast[data-state="in"][data-depth="1"]{transform:scale(0.97);}
+.toast-stack .toast[data-state="in"][data-depth="2"]{transform:scale(0.94);}
+.toast-stack .toast[data-state="in"][data-depth="3"]{transform:scale(0.91);}
+
+/* ==========================================================================
+   8. CART COUNT POP
+   beUI SPRING_SWAP {460, 30, 0.55} — the same curve their Action Swap uses
+   for content that changes under you.
+   ========================================================================== */
+
+.cart-count{
+  transition:
+    transform var(--spring-swap-dur) var(--spring-swap),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.cart-count[data-bump="true"]{transform:scale(1.35);}
+
+/* Numbers that count rather than snap sit on their own baseline so the
+   width churn of tabular digits does not shift the row. */
+[data-number]{font-variant-numeric:tabular-nums;}
+
+/* ==========================================================================
+   9. MARQUEE
+   ========================================================================== */
+
+@media (hover:hover) and (pointer:fine){
+  .marquee-strip:hover .marquee-track{animation-play-state:paused;}
+}
+
+/* ==========================================================================
+   10. REDUCED MOTION
+   beUI degrades every component to opacity-only. Same policy here: nothing
+   below moves, scales, blurs, or tilts — content still resolves to its
+   final state, it just arrives without travel.
+   ========================================================================== */
+
+@media (prefers-reduced-motion:reduce){
+  [data-reveal],
+  .text-reveal .tr-word{
+    transform:none !important;
+    filter:none !important;
+    transition:opacity var(--dur-base) linear var(--reveal-delay, 0ms) !important;
+  }
+  .product-card,
+  .product-media,
+  .pdp-media{
+    --tilt-x:0deg;--tilt-y:0deg;
+    transform:none !important;
+  }
+  .product-media::after,
+  .pdp-media::after{display:none;}
+  .btn-primary,.btn-outline,.nav-cta,.cart-button,.filter-chip,
+  .email-form button,.promo-form button,.qty-stepper button,.nav-toggle,
+  .cart-count{--press:1 !important;transform:none !important;}
+  .acc-icon,.acc-icon::after{transition:none;}
+  .scroll-progress{transition:none;}
+  .toast-stack .toast{
+    transform:none !important;filter:none !important;
+    transition:opacity var(--dur-fast) linear !important;
+  }
+  .toast-stack .toast[data-state="in"]{opacity:1;}
+  .marquee-track{animation:none;}
+}
+
+/* linear() carries the solved spring curves; everything above falls back to
+   the bezier approximations in :root when it is unavailable. */
+@supports (animation-timing-function: linear(0, 1)){
+  :root{
+    --spring-press: linear(0 0%, 0.0192 2.5%, 0.068 5%, 0.1357 7.5%, 0.2142 10%, 0.2974 12.5%, 0.3809 15%, 0.4614 17.5%, 0.5371 20%, 0.6067 22.5%, 0.6694 25%, 0.7251 27.5%, 0.7739 30%, 0.8162 32.5%, 0.8523 35%, 0.8828 37.5%, 0.9083 40%, 0.9295 42.5%, 0.9468 45%, 0.9607 47.5%, 0.9719 50%, 0.9807 52.5%, 0.9876 55%, 0.9928 57.5%, 0.9967 60%, 0.9996 62.5%, 1.0016 65%, 1.0029 67.5%, 1.0037 70%, 1.0042 72.5%, 1.0043 75%, 1.0043 77.5%, 1.0041 80%, 1.0038 82.5%, 1.0035 85%, 1.0031 87.5%, 1.0028 90%, 1.0024 92.5%, 1.0021 95%, 1.0018 97.5%, 1 100%);
+    --spring-swap: linear(0 0%, 0.0143 2.5%, 0.0511 5%, 0.103 7.5%, 0.1642 10%, 0.2306 12.5%, 0.2987 15%, 0.3663 17.5%, 0.4317 20%, 0.4937 22.5%, 0.5517 25%, 0.6052 27.5%, 0.654 30%, 0.6982 32.5%, 0.738 35%, 0.7734 37.5%, 0.8049 40%, 0.8326 42.5%, 0.8569 45%, 0.8781 47.5%, 0.8965 50%, 0.9125 52.5%, 0.9263 55%, 0.9381 57.5%, 0.9482 60%, 0.9568 62.5%, 0.9641 65%, 0.9703 67.5%, 0.9756 70%, 0.9799 72.5%, 0.9836 75%, 0.9867 77.5%, 0.9892 80%, 0.9913 82.5%, 0.9931 85%, 0.9945 87.5%, 0.9957 90%, 0.9966 92.5%, 0.9974 95%, 0.998 97.5%, 1 100%);
+    --spring-mouse: linear(0 0%, 0.0173 2.5%, 0.061 5%, 0.1213 7.5%, 0.191 10%, 0.2647 12.5%, 0.3389 15%, 0.4109 17.5%, 0.4791 20%, 0.5425 22.5%, 0.6006 25%, 0.6531 27.5%, 0.7002 30%, 0.742 32.5%, 0.7789 35%, 0.8112 37.5%, 0.8394 40%, 0.8638 42.5%, 0.8848 45%, 0.9029 47.5%, 0.9184 50%, 0.9316 52.5%, 0.9428 55%, 0.9523 57.5%, 0.9603 60%, 0.9671 62.5%, 0.9728 65%, 0.9775 67.5%, 0.9815 70%, 0.9848 72.5%, 0.9875 75%, 0.9898 77.5%, 0.9917 80%, 0.9932 82.5%, 0.9945 85%, 0.9956 87.5%, 0.9964 90%, 0.9971 92.5%, 0.9977 95%, 0.9982 97.5%, 1 100%);
+    --spring-text: linear(0 0%, 0.0212 2.5%, 0.0735 5%, 0.1436 7.5%, 0.2224 10%, 0.3036 12.5%, 0.3832 15%, 0.4586 17.5%, 0.5283 20%, 0.5916 22.5%, 0.6484 25%, 0.6986 27.5%, 0.7428 30%, 0.7812 32.5%, 0.8145 35%, 0.8432 37.5%, 0.8677 40%, 0.8887 42.5%, 0.9066 45%, 0.9217 47.5%, 0.9345 50%, 0.9453 52.5%, 0.9544 55%, 0.962 57.5%, 0.9684 60%, 0.9737 62.5%, 0.9782 65%, 0.9819 67.5%, 0.985 70%, 0.9876 72.5%, 0.9897 75%, 0.9915 77.5%, 0.993 80%, 0.9942 82.5%, 0.9952 85%, 0.9961 87.5%, 0.9968 90%, 0.9973 92.5%, 0.9978 95%, 0.9982 97.5%, 1 100%);
+    --spring-progress: linear(0 0%, 0.0812 2.5%, 0.2083 5%, 0.3266 7.5%, 0.4287 10%, 0.5156 12.5%, 0.5894 15%, 0.6519 17.5%, 0.7049 20%, 0.7498 22.5%, 0.7879 25%, 0.8202 27.5%, 0.8476 30%, 0.8708 32.5%, 0.8905 35%, 0.9071 37.5%, 0.9213 40%, 0.9333 42.5%, 0.9434 45%, 0.952 47.5%, 0.9593 50%, 0.9655 52.5%, 0.9708 55%, 0.9752 57.5%, 0.979 60%, 0.9822 62.5%, 0.9849 65%, 0.9872 67.5%, 0.9892 70%, 0.9908 72.5%, 0.9922 75%, 0.9934 77.5%, 0.9944 80%, 0.9953 82.5%, 0.996 85%, 0.9966 87.5%, 0.9971 90%, 0.9975 92.5%, 0.9979 95%, 0.9982 97.5%, 1 100%);
+    --spring-toast: linear(0 0%, 0.016 2.5%, 0.0568 5%, 0.1135 7.5%, 0.1797 10%, 0.2504 12.5%, 0.3222 15%, 0.3925 17.5%, 0.4596 20%, 0.5226 22.5%, 0.5808 25%, 0.6338 27.5%, 0.6817 30%, 0.7246 32.5%, 0.7627 35%, 0.7964 37.5%, 0.8259 40%, 0.8517 42.5%, 0.874 45%, 0.8934 47.5%, 0.9101 50%, 0.9243 52.5%, 0.9366 55%, 0.947 57.5%, 0.9558 60%, 0.9633 62.5%, 0.9696 65%, 0.9749 67.5%, 0.9793 70%, 0.983 72.5%, 0.9861 75%, 0.9887 77.5%, 0.9908 80%, 0.9925 82.5%, 0.994 85%, 0.9952 87.5%, 0.9961 90%, 0.9969 92.5%, 0.9976 95%, 0.9981 97.5%, 1 100%);
+    --spring-acc-row: linear(0 0%, 0.0284 2.5%, 0.1016 5%, 0.2038 7.5%, 0.3215 10%, 0.4444 12.5%, 0.5643 15%, 0.6757 17.5%, 0.7747 20%, 0.8594 22.5%, 0.929 25%, 0.9838 27.5%, 1.0248 30%, 1.0535 32.5%, 1.0716 35%, 1.081 37.5%, 1.0835 40%, 1.0808 42.5%, 1.0745 45%, 1.0659 47.5%, 1.056 50%, 1.0457 52.5%, 1.0357 55%, 1.0265 57.5%, 1.0183 60%, 1.0113 62.5%, 1.0056 65%, 1.0011 67.5%, 0.9977 70%, 0.9954 72.5%, 0.9939 75%, 0.9932 77.5%, 0.993 80%, 0.9933 82.5%, 0.9938 85%, 0.9946 87.5%, 0.9954 90%, 0.9962 92.5%, 0.9971 95%, 0.9978 97.5%, 1 100%);
+    --spring-acc-open: linear(0 0%, 0.0277 2.5%, 0.0984 5%, 0.196 7.5%, 0.3076 10%, 0.4235 12.5%, 0.5363 15%, 0.6409 17.5%, 0.7343 20%, 0.8147 22.5%, 0.8818 25%, 0.9358 27.5%, 0.9776 30%, 1.0085 32.5%, 1.0302 35%, 1.044 37.5%, 1.0515 40%, 1.0542 42.5%, 1.0533 45%, 1.0498 47.5%, 1.0448 50%, 1.0388 52.5%, 1.0325 55%, 1.0263 57.5%, 1.0205 60%, 1.0154 62.5%, 1.0108 65%, 1.0071 67.5%, 1.004 70%, 1.0016 72.5%, 0.9998 75%, 0.9986 77.5%, 0.9977 80%, 0.9973 82.5%, 0.9971 85%, 0.9971 87.5%, 0.9973 90%, 0.9975 92.5%, 0.9978 95%, 0.9982 97.5%, 1 100%);
+    --spring-acc-close: linear(0 0%, 0.0171 2.5%, 0.0621 5%, 0.1264 7.5%, 0.2032 10%, 0.2869 12.5%, 0.373 15%, 0.458 17.5%, 0.5395 20%, 0.6157 22.5%, 0.6854 25%, 0.748 27.5%, 0.8032 30%, 0.851 32.5%, 0.8918 35%, 0.9259 37.5%, 0.9539 40%, 0.9764 42.5%, 0.9941 45%, 1.0075 47.5%, 1.0174 50%, 1.0242 52.5%, 1.0285 55%, 1.0308 57.5%, 1.0315 60%, 1.0311 62.5%, 1.0297 65%, 1.0277 67.5%, 1.0253 70%, 1.0226 72.5%, 1.0199 75%, 1.0172 77.5%, 1.0147 80%, 1.0122 82.5%, 1.01 85%, 1.0081 87.5%, 1.0063 90%, 1.0048 92.5%, 1.0035 95%, 1.0024 97.5%, 1 100%);
+    --spring-chevron: linear(0 0%, 0.0165 2.5%, 0.06 5%, 0.1227 7.5%, 0.1981 10%, 0.2807 12.5%, 0.3662 15%, 0.4512 17.5%, 0.5331 20%, 0.6101 22.5%, 0.681 25%, 0.745 27.5%, 0.8016 30%, 0.851 32.5%, 0.8932 35%, 0.9287 37.5%, 0.9579 40%, 0.9815 42.5%, 1 45%, 1.0141 47.5%, 1.0243 50%, 1.0314 52.5%, 1.0357 55%, 1.0379 57.5%, 1.0384 60%, 1.0375 62.5%, 1.0357 65%, 1.0332 67.5%, 1.0302 70%, 1.027 72.5%, 1.0237 75%, 1.0205 77.5%, 1.0174 80%, 1.0144 82.5%, 1.0118 85%, 1.0094 87.5%, 1.0072 90%, 1.0054 92.5%, 1.0038 95%, 1.0025 97.5%, 1 100%);
+  }
+}
