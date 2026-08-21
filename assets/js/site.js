@@ -257,13 +257,19 @@
     });
   }
 
-  /* ---------- product card markup ---------- */
+  /* ---------- product card markup ----------
+     The tile is a link wrapping the image, so the image itself carries alt=""
+     — the link already has an accessible name and a screen reader announcing
+     both would read the product twice.
+  ------------------------------------------ */
+  var CARD_SIZES = '(max-width:640px) 90vw, (max-width:1100px) 45vw, 300px';
+
   function productCard(product) {
     return (
       '<article class="product-card">' +
         '<a class="product-media" href="product.html?id=' + esc(product.id) + '" ' +
           'aria-label="' + esc(product.name + ' — ' + product.type) + '">' +
-          ELMA.art(product.form) +
+          ELMA.picture(product, 'square', { sizes: CARD_SIZES, alt: '' }) +
           (product.badge ? '<span class="product-badge">' + esc(product.badge) + '</span>' : '') +
         '</a>' +
         '<div class="product-body">' +
@@ -392,7 +398,12 @@
     if (desc) desc.setAttribute('content', product.tagline);
 
     root.innerHTML =
-      '<div class="pdp-media">' + ELMA.art(product.form) + '</div>' +
+      '<div class="pdp-media">' +
+        ELMA.picture(product, 'portrait', {
+          sizes: '(max-width:900px) 92vw, 46vw',
+          eager: true
+        }) +
+      '</div>' +
       '<div class="pdp-copy">' +
         '<nav class="breadcrumb" aria-label="Breadcrumb">' +
           '<a href="index.html">Home</a><span>/</span>' +
@@ -551,8 +562,9 @@
         root.innerHTML = lines.map(function (line) {
           var p = line.product;
           return '<div class="cart-line" data-line="' + esc(p.id) + '">' +
-            '<a class="cart-line-media" href="product.html?id=' + esc(p.id) + '">' +
-              ELMA.art(p.form) + '</a>' +
+            '<a class="cart-line-media" href="product.html?id=' + esc(p.id) + '" ' +
+              'aria-label="' + esc(p.name) + '">' +
+              ELMA.picture(p, 'square', { sizes: '110px', alt: '' }) + '</a>' +
             '<div>' +
               '<a class="cart-line-name" href="product.html?id=' + esc(p.id) + '">' +
                 esc(p.name) + '</a>' +

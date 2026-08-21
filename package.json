@@ -5,8 +5,10 @@
   "description": "ELMA \u2014 static skin care storefront. No build step; the dev dependency is for the test suite only.",
   "scripts": {
     "start": "python3 -m http.server 8000",
-    "test": "node test/site.test.mjs && node test/motion.test.mjs",
-    "test:motion": "node test/motion.test.mjs"
+    "test": "node test/site.test.mjs && node test/motion.test.mjs && node test/images.test.mjs",
+    "test:motion": "node test/motion.test.mjs",
+    "test:images": "node test/images.test.mjs",
+    "images": "python3 tools/generate-images.py"
   },
   "devDependencies": {
     "jsdom": "^27.0.0"

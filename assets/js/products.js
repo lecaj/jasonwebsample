@@ -18,6 +18,8 @@
   var PRODUCTS = [
     {
       id: 'morning-dew-cleanser',
+      imageAlt: 'A 150 ml Morning Dew pump bottle, pale sage gel behind frosted glass, ' +
+        'lit against a warm oat backdrop.',
       name: 'Morning Dew',
       type: 'Gel-to-milk cleanser',
       category: 'cleanse',
@@ -45,6 +47,8 @@
     },
     {
       id: 'soft-focus-toner',
+      imageAlt: 'A 200 ml Soft Focus toner bottle with a dark wine cap and clear ' +
+        'liquid, lit against a warm oat backdrop.',
       name: 'Soft Focus',
       type: 'PHA resurfacing toner',
       category: 'cleanse',
@@ -72,6 +76,8 @@
     },
     {
       id: 'quiet-hour-serum',
+      imageAlt: 'A 30 ml Quiet Hour dropper bottle holding a pale rose serum, ' +
+        'lit against a warm oat backdrop.',
       name: 'Quiet Hour',
       type: 'Hydrating serum',
       category: 'hydrate',
@@ -99,6 +105,8 @@
     },
     {
       id: 'slow-light-vitamin-c',
+      imageAlt: 'A 30 ml Slow Light dropper bottle filled with amber vitamin C ' +
+        'serum, lit against a warm oat backdrop.',
       name: 'Slow Light',
       type: 'Stabilised vitamin C serum',
       category: 'treat',
@@ -126,6 +134,8 @@
     },
     {
       id: 'night-ritual-retinal',
+      imageAlt: 'A 30 ml Night Ritual dropper bottle filled with a deep wine-red ' +
+        'retinal treatment, lit against a warm oat backdrop.',
       name: 'Night Ritual',
       type: 'Encapsulated retinal treatment',
       category: 'treat',
@@ -154,6 +164,8 @@
     },
     {
       id: 'second-skin-cream',
+      imageAlt: 'A 50 ml Second Skin jar with a wide dark wine lid and pale cream ' +
+        'balm, lit against a warm oat backdrop.',
       name: 'Second Skin',
       type: 'Barrier repair cream',
       category: 'hydrate',
@@ -181,6 +193,8 @@
     },
     {
       id: 'daybreak-spf',
+      imageAlt: 'A 50 ml Daybreak SPF 40 tube in warm sand with a dark wine cap, ' +
+        'lit against a warm oat backdrop.',
       name: 'Daybreak',
       type: 'Mineral SPF 40',
       category: 'protect',
@@ -208,6 +222,9 @@
     },
     {
       id: 'the-daily-ritual-set',
+      imageAlt: 'The Daily Ritual set staged together — the Second Skin jar, the ' +
+        'Morning Dew pump bottle, the Daybreak SPF tube and the Quiet Hour ' +
+        'dropper, lit against a warm oat backdrop.',
       name: 'The Daily Ritual',
       type: 'Four-step routine set',
       category: 'sets',
@@ -237,9 +254,85 @@
     }
   ];
 
-  /* --- product artwork -------------------------------------------------
-     Inline SVG rather than raster assets: no image pipeline, scales cleanly,
-     and picks up the brand palette directly.
+  /* --- product imagery -------------------------------------------------
+     Files come from tools/generate-images.py, which owns the naming scheme:
+
+       assets/img/products/<id>/square-{400,800}.{avif,webp,jpg}
+       assets/img/products/<id>/portrait-{600,1200}.{avif,webp,jpg}
+       assets/img/products/<id>/cutout-{300,600}.{webp,png}
+
+     Three variants because three art directions: `square` is the catalogue
+     shot for tiles, `portrait` is the closer PDP crop, `cutout` has an alpha
+     channel for the hero, where the bottle floats inside the rings instead of
+     sitting in a frame.
+
+     Every <img> ships explicit width/height so the grid reserves its space
+     before a byte of image arrives — with eight tiles lazy-loading at once,
+     that is the difference between a calm page and a jumping one.
+  --------------------------------------------------------------------- */
+  var IMG_ROOT = 'assets/img/products/';
+
+  var VARIANTS = {
+    square:   { widths: [400, 800],  ratio: 1,      formats: ['avif', 'webp'], fallback: 'jpg' },
+    portrait: { widths: [600, 1200], ratio: 1.05,   formats: ['avif', 'webp'], fallback: 'jpg' },
+    cutout:   { widths: [300, 600],  ratio: 2,      formats: ['webp'],         fallback: 'png' }
+  };
+
+  function srcset(id, variant, ext) {
+    var v = VARIANTS[variant];
+    return v.widths.map(function (w) {
+      return IMG_ROOT + id + '/' + variant + '-' + w + '.' + ext + ' ' + w + 'w';
+    }).join(', ');
+  }
+
+  /**
+   * Build a <picture> for a product.
+   *
+   * opts.sizes    — required; the layout width of the slot, so the browser can
+   *                 pick a candidate before CSS is resolved.
+   * opts.eager    — true for above-the-fold art (skips lazy loading and marks
+   *                 it high priority); everything else defers.
+   * opts.className — applied to the <img>.
+   */
+  function picture(product, variant, opts) {
+    opts = opts || {};
+    var v = VARIANTS[variant];
+    if (!v || !product) return '';
+
+    var id = product.id;
+    var widest = v.widths[v.widths.length - 1];
+    var sizes = opts.sizes || '100vw';
+    var alt = opts.alt !== undefined ? opts.alt : (product.imageAlt || product.name);
+
+    var sources = v.formats.map(function (ext) {
+      return '<source type="image/' + ext + '" srcset="' + srcset(id, variant, ext) +
+             '" sizes="' + esc(sizes) + '">';
+    }).join('');
+
+    return (
+      '<picture>' + sources +
+        '<img src="' + IMG_ROOT + id + '/' + variant + '-' + widest + '.' + v.fallback + '" ' +
+          'srcset="' + srcset(id, variant, v.fallback) + '" ' +
+          'sizes="' + esc(sizes) + '" ' +
+          'width="' + widest + '" height="' + Math.round(widest * v.ratio) + '" ' +
+          'alt="' + esc(alt) + '" ' +
+          'decoding="async" ' +
+          (opts.eager ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"') +
+          (opts.className ? ' class="' + esc(opts.className) + '"' : '') +
+        '>' +
+      '</picture>'
+    );
+  }
+
+  function esc(value) {
+    return String(value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* --- fallback artwork ------------------------------------------------
+     The original inline-SVG shapes. No longer used for product media, but
+     kept as a resolution-independent stand-in for any slot that needs one.
   --------------------------------------------------------------------- */
   function art(form) {
     var cap = '#4A1C28';
@@ -304,6 +397,8 @@
   window.ELMA.products = PRODUCTS;
   window.ELMA.categories = CATEGORIES;
   window.ELMA.art = art;
+  window.ELMA.picture = picture;
+  window.ELMA.imageVariants = VARIANTS;
   window.ELMA.getProduct = function (id) {
     for (var i = 0; i < PRODUCTS.length; i++) {
       if (PRODUCTS[i].id === id) return PRODUCTS[i];
