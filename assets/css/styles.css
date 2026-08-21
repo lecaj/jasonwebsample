@@ -285,6 +285,131 @@ nav.site-nav{
 .step-text p{font-size:0.86rem;color:rgba(244,237,226,0.65);line-height:1.5;}
 @media (max-width:860px){.ritual{grid-template-columns:1fr;padding:60px 8vw;gap:36px;}}
 
+/* ---------- DARK SECTION (Phase 4 — the Louvre moment) ----------
+   Exactly one full-bleed dark beat on an otherwise light site. Every colour
+   this section needs is declared right here, scoped under .section--dark —
+   nothing here is promoted to :root, so nothing here can leak into the rest
+   of the (oat/light) site. Do not reuse --dark-* tokens outside this block,
+   and do not add a second .section--dark elsewhere without checking with
+   the CEO first — see ASHA-18. */
+.section--dark{
+  --dark-bg: #0C0A09;
+  --dark-ink: #F7F2EA;
+  --dark-ink-soft: #B9AFA5;
+  --dark-glow: #F1D9C9;
+  --dark-line: rgba(247,237,234,0.16);
+  position:relative;
+  isolation:isolate; /* keeps this section's stacking self-contained */
+  background:var(--dark-bg);
+  color:var(--dark-ink);
+  overflow:hidden;
+  padding:130px 6vw 110px;
+}
+
+/* Dot rail, left edge — decorative rhythm, echoes the reference's vertical
+   column of dots. Purely ornamental, so it is aria-hidden. */
+.dark-rail{
+  position:absolute;left:28px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:16px;z-index:4;
+}
+.dark-rail span{width:5px;height:5px;border-radius:50%;background:var(--dark-line);}
+.dark-rail span:nth-child(2){background:rgba(247,242,234,0.4);}
+.dark-rail span:nth-child(3){background:var(--dark-ink);}
+
+.dark-eyebrow{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:0.78rem;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--sage);font-weight:600;margin-bottom:48px;
+  /* sage (#7C8A6B) on --dark-bg (#0C0A09) is ~5.4:1 — AA for normal text */
+}
+.dark-eyebrow::before{content:'';width:22px;height:1px;background:var(--sage);}
+
+/* Stack: heading and visual share one grid cell so the crossing happens by
+   layout, not by hand-tuned pixel offsets — it holds at any content width. */
+.dark-stage{
+  display:grid;grid-template-areas:"stack";place-items:center;
+  min-height:600px;max-width:900px;margin:0 auto;
+}
+.dark-heading,.dark-visual{grid-area:stack;position:relative;}
+
+.dark-heading{
+  font-family:'Fraunces',serif;font-weight:400;
+  font-size:clamp(2.6rem,6vw,5.2rem);
+  line-height:1.02;letter-spacing:-0.02em;
+  color:var(--dark-ink);max-width:11ch;text-align:left;
+  justify-self:center;
+  /* Shifts the box left by a share of its own width — proportional, so the
+     overlap with the product below holds regardless of viewport width. */
+  transform:translateX(-36%);
+  z-index:2;
+}
+
+.dark-visual{
+  width:min(320px,58vw);height:min(560px,88vw);
+  justify-self:center;z-index:3; /* above the heading: the product occludes it */
+}
+/* Arc glow — same crossing technique as the hero's rings, pushed further:
+   the bottle occludes both the glow *and* the headline behind it. */
+.dark-glow{
+  position:absolute;left:50%;top:50%;
+  width:180%;height:120%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(241,217,201,0.55) 0%, rgba(241,217,201,0.16) 45%, transparent 72%);
+  z-index:1;
+  animation:dark-glow-pulse 6s ease-in-out infinite;
+}
+.dark-glow::after{
+  content:'';position:absolute;inset:8%;border-radius:50%;
+  border:1px solid rgba(241,217,201,0.45);
+  box-shadow:0 0 70px 14px rgba(241,217,201,0.22);
+}
+.dark-art{position:absolute;inset:0;z-index:2;}
+.dark-art picture{position:absolute;inset:0;display:block;}
+.dark-art img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 50px 70px rgba(0,0,0,0.55));
+}
+
+.dark-caption{
+  max-width:640px;margin:56px auto 0;text-align:center;
+  color:var(--dark-ink-soft);font-size:0.98rem;line-height:1.7;
+  /* solid #B9AFA5 on --dark-bg is ~9.2:1 — AA for normal text, well clear */
+}
+.dark-link{
+  color:var(--dark-glow);font-weight:500;
+  border-bottom:1px solid rgba(241,217,201,0.4);padding-bottom:1px;
+  /* #F1D9C9 on --dark-bg is ~14.6:1 — AA for links/small text */
+  transition:color var(--dur-fast) var(--ease-out),
+             border-color var(--dur-fast) var(--ease-out);
+}
+.dark-link:hover{color:var(--dark-ink);border-color:var(--dark-ink);}
+/* The sitewide :focus-visible ring is --wine, ~1.9:1 on this background —
+   invisible against near-black. Scoped override only, not a token change. */
+.section--dark :focus-visible{outline-color:var(--dark-glow);}
+
+@keyframes dark-glow-pulse{0%,100%{opacity:0.7;}50%{opacity:1;}}
+@media (prefers-reduced-motion:reduce){
+  .dark-glow{animation:none;opacity:1;}
+}
+
+@media (max-width:640px){
+  /* Below the fold width the plan calls out (390px), the crossing headline
+     cannot share horizontal space with the product without colliding — so
+     it stops trying to. Heading and visual stack instead of overlapping. */
+  .section--dark{padding:90px 6vw 80px;}
+  .dark-stage{
+    display:flex;flex-direction:column;align-items:center;gap:32px;
+    min-height:auto;
+  }
+  .dark-heading{
+    transform:none;text-align:center;max-width:14ch;
+    font-size:clamp(2.2rem,9vw,2.8rem);
+  }
+  .dark-visual{width:min(240px,62vw);height:min(420px,92vw);}
+  .dark-rail{display:none;}
+}
+
 /* ---------- PRODUCT CARDS ---------- */
 .product-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));

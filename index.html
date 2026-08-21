@@ -125,6 +125,19 @@
   </div>
 </section>
 
+<section class="section--dark" id="night-ritual">
+  <div class="dark-rail" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="dark-eyebrow">New · Nights only</div>
+  <div class="dark-stage">
+    <h2 class="dark-heading">Retinal,<br>released<br>slowly.</h2>
+    <div class="dark-visual">
+      <div class="dark-glow" aria-hidden="true"></div>
+      <div class="dark-art" id="dark-art"></div>
+    </div>
+  </div>
+  <p class="dark-caption">Night Ritual — encapsulated retinal at 0.05%, timed to release across the night. The step the rest of the routine earns you. <a class="dark-link" href="product.html?id=night-ritual-retinal">Shop Night Ritual →</a></p>
+</section>
+
 <section class="section" id="ingredients">
   <div class="split">
     <div class="split-visual" id="ingredient-art"></div>
@@ -208,6 +221,13 @@
   document.getElementById('ingredient-art').innerHTML = ELMA.picture(
     ELMA.getProduct('second-skin-cream'), 'square',
     { sizes: '(max-width:900px) 88vw, 44vw' }
+  );
+  /* The dark section is the one full-bleed dramatic beat on the site (see
+     ASHA-18) — it spotlights Night Ritual alone, so it takes the same cutout
+     art direction as the hero. Below the fold: lazy, not eager. */
+  document.getElementById('dark-art').innerHTML = ELMA.picture(
+    ELMA.getProduct('night-ritual-retinal'), 'cutout',
+    { sizes: '(max-width:640px) 50vw, 280px' }
   );
 </script>
 </body>
