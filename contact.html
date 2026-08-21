@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — ELMA</title>
+<meta name="description" content="Questions about a formula, an order, or where to start — reach the ELMA team.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="site-nav">
+  <a class="logo" href="index.html">elma</a>
+  <div class="nav-links" data-nav-links>
+    <a href="shop.html">Shop</a>
+    <a href="index.html#ritual">The ritual</a>
+    <a href="about.html">Our story</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="cart-button" data-cart-link type="button">
+      Cart <span class="cart-count" data-cart-count data-empty="true">0</span>
+      <span class="visually-hidden" data-cart-label>0 items in cart</span>
+    </button>
+    <a class="nav-cta" href="shop.html">Shop now</a>
+    <button class="nav-toggle" data-nav-toggle type="button" aria-expanded="false">Menu</button>
+  </div>
+</nav>
+
+<main id="main">
+
+<header class="page-head">
+  <h1>Talk to us.</h1>
+  <p>Formula questions, order trouble, or a routine you would like a second opinion on. We reply within one business day.</p>
+</header>
+
+<section class="section">
+  <div class="cart-layout">
+
+    <form class="form-card" data-contact-form novalidate>
+      <h2>Send a message</h2>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="c-name">Your name</label>
+          <input id="c-name" name="name" type="text" data-required autocomplete="name">
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="field">
+          <label for="c-email">Email address</label>
+          <input id="c-email" name="email" type="email" data-required autocomplete="email">
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="c-topic">What is this about?</label>
+        <select id="c-topic" name="topic">
+          <option>Where should I start?</option>
+          <option>A formula or ingredient question</option>
+          <option>An existing order</option>
+          <option>Returns and the 60-day guarantee</option>
+          <option>Wholesale or press</option>
+          <option>Something else</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="c-message">Message</label>
+        <textarea id="c-message" name="message" data-required
+          placeholder="Tell us about your skin, your current routine, or what went wrong."></textarea>
+        <span class="field-error" aria-live="polite"></span>
+      </div>
+
+      <button class="btn-primary btn-block" type="submit">Send message</button>
+      <p class="form-msg" role="status" style="text-align:center"></p>
+      <p class="summary-note" style="text-align:center">
+        Demo storefront — this form validates and confirms locally, but does not send email.
+      </p>
+    </form>
+
+    <aside class="summary" aria-label="Other ways to reach us">
+      <h2>Other ways</h2>
+      <div class="summary-row"><span>Email</span><span>hello@elma.example</span></div>
+      <div class="summary-row"><span>Order support</span><span>orders@elma.example</span></div>
+      <div class="summary-row"><span>Press</span><span>press@elma.example</span></div>
+      <div class="summary-row"><span>Hours</span><span>Mon–Fri, 9–5 ET</span></div>
+      <p class="summary-note" style="margin-top:22px">
+        Most routine questions are already answered on the
+        <a href="faq.html" style="border-bottom:1px solid">FAQ</a> — order, timing,
+        pregnancy safety, and how to start a retinoid without peeling.
+      </p>
+      <p style="margin-top:24px"><a class="btn-outline btn-block" href="faq.html">Read the FAQ</a></p>
+    </aside>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">elma</div>
+      <p style="margin-top:14px;max-width:30ch;line-height:1.6">Barrier-first skin care, made for the routine you will actually keep.</p>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <a href="shop.html?category=cleanse">Cleanse</a>
+        <a href="shop.html?category=treat">Treat</a>
+        <a href="shop.html?category=hydrate">Hydrate</a>
+        <a href="shop.html?category=protect">Protect</a>
+        <a href="shop.html?category=sets">Sets</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="about.html">Our story</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="cart.html">Cart</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 ELMA. A daily ritual, reconsidered.</div>
+    <div>Demo storefront — no orders are fulfilled and no payments are processed.</div>
+  </div>
+</footer>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — ELMA</title>
+<meta name="description" content="The full ELMA range: cleansers, serums, barrier cream, mineral SPF, and the four-step routine set.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="site-nav">
+  <a class="logo" href="index.html">elma</a>
+  <div class="nav-links" data-nav-links>
+    <a href="shop.html">Shop</a>
+    <a href="index.html#ritual">The ritual</a>
+    <a href="about.html">Our story</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="cart-button" data-cart-link type="button">
+      Cart <span class="cart-count" data-cart-count data-empty="true">0</span>
+      <span class="visually-hidden" data-cart-label>0 items in cart</span>
+    </button>
+    <a class="nav-cta" href="shop.html">Shop now</a>
+    <button class="nav-toggle" data-nav-toggle type="button" aria-expanded="false">Menu</button>
+  </div>
+</nav>
+
+<main id="main">
+
+<header class="page-head">
+  <h1>The full range</h1>
+  <p>Seven products, built to be layered in one order. Start with the four-step set, or fill a gap in the routine you already have.</p>
+</header>
+
+<section class="section">
+  <div class="shop-toolbar">
+    <div class="filter-group" data-filters role="group" aria-label="Filter by category"></div>
+    <div class="sort-group">
+      <label for="sort">Sort</label>
+      <select id="sort" data-sort>
+        <option value="featured">Featured</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+        <option value="name">Name: A–Z</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="result-count" data-result-count aria-live="polite"></p>
+  <div class="product-grid" data-shop-grid></div>
+</section>
+
+<section class="cta-section" style="padding-top:20px">
+  <h2>Not sure where to start?</h2>
+  <p>The Daily Ritual set is the four products most people end up repurchasing anyway — $32 less than buying them apart.</p>
+  <a class="btn-primary" href="product.html?id=the-daily-ritual-set">See the set</a>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">elma</div>
+      <p style="margin-top:14px;max-width:30ch;line-height:1.6">Barrier-first skin care, made for the routine you will actually keep.</p>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <a href="shop.html?category=cleanse">Cleanse</a>
+        <a href="shop.html?category=treat">Treat</a>
+        <a href="shop.html?category=hydrate">Hydrate</a>
+        <a href="shop.html?category=protect">Protect</a>
+        <a href="shop.html?category=sets">Sets</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="about.html">Our story</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="cart.html">Cart</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 ELMA. A daily ritual, reconsidered.</div>
+    <div>Demo storefront — no orders are fulfilled and no payments are processed.</div>
+  </div>
+</footer>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

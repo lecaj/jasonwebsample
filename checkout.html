@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — ELMA</title>
+<meta name="description" content="Checkout — demo storefront, no payment is processed.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="site-nav">
+  <a class="logo" href="index.html">elma</a>
+  <div class="nav-links" data-nav-links>
+    <a href="shop.html">Shop</a>
+    <a href="index.html#ritual">The ritual</a>
+    <a href="about.html">Our story</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="cart-button" data-cart-link type="button">
+      Cart <span class="cart-count" data-cart-count data-empty="true">0</span>
+      <span class="visually-hidden" data-cart-label>0 items in cart</span>
+    </button>
+    <a class="nav-cta" href="shop.html">Shop now</a>
+    <button class="nav-toggle" data-nav-toggle type="button" aria-expanded="false">Menu</button>
+  </div>
+</nav>
+
+<main id="main">
+
+<section class="section">
+
+  <div data-checkout-done hidden>
+    <div class="confirmation">
+      <div class="check" aria-hidden="true">✓</div>
+      <h1 tabindex="-1">Your ritual is on its way.</h1>
+      <p>We sent a confirmation to <strong data-order-email></strong>.</p>
+      <div class="order-ref" data-order-ref></div>
+      <p>Total charged: <strong data-order-total></strong></p>
+      <p style="margin-top:20px;font-size:0.85rem">This is a demo storefront — nothing ships and no card was charged.</p>
+      <p style="margin-top:28px"><a class="btn-primary" href="shop.html">Back to the shop</a></p>
+    </div>
+  </div>
+
+  <div data-checkout-panel>
+    <header class="page-head" style="border:none;padding-top:0">
+      <h1>Checkout</h1>
+      <p>Demo storefront — enter anything you like. No payment details leave this page, and nothing is sent to a server.</p>
+    </header>
+
+    <div class="cart-layout">
+      <form class="form-card" data-checkout-form novalidate>
+        <h2>Contact</h2>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" data-rule="email" autocomplete="email" placeholder="you@email.com">
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+
+        <h2 style="margin-top:34px">Shipping</h2>
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" data-rule="name" autocomplete="name">
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="field">
+          <label for="address">Street address</label>
+          <input id="address" name="address" type="text" data-rule="address" autocomplete="street-address">
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" data-rule="city" autocomplete="address-level2">
+            <span class="field-error" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="postal">Postal code</label>
+            <input id="postal" name="postal" type="text" data-rule="postal" autocomplete="postal-code">
+            <span class="field-error" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="country">Country</label>
+          <select id="country" name="country" data-rule="country" autocomplete="country-name">
+            <option value="">Select a country</option>
+            <option>United States</option>
+            <option>Canada</option>
+            <option>United Kingdom</option>
+            <option>Australia</option>
+            <option>Germany</option>
+            <option>France</option>
+          </select>
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+
+        <h2 style="margin-top:34px">Payment</h2>
+        <div class="field">
+          <label for="card">Card number</label>
+          <input id="card" name="card" type="text" data-rule="card" inputmode="numeric" placeholder="4242 4242 4242 4242">
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="expiry">Expiry</label>
+            <input id="expiry" name="expiry" type="text" data-rule="expiry" placeholder="MM/YY" inputmode="numeric">
+            <span class="field-error" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="cvc">CVC</label>
+            <input id="cvc" name="cvc" type="text" data-rule="cvc" inputmode="numeric" placeholder="123">
+            <span class="field-error" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <button class="btn-primary btn-block" type="submit" style="margin-top:14px">Place order</button>
+        <p class="summary-note" style="text-align:center">
+          By placing this demo order you agree to nothing at all.
+        </p>
+      </form>
+
+      <aside class="summary" data-checkout-summary aria-label="Order summary"></aside>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">elma</div>
+      <p style="margin-top:14px;max-width:30ch;line-height:1.6">Barrier-first skin care, made for the routine you will actually keep.</p>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <a href="shop.html?category=cleanse">Cleanse</a>
+        <a href="shop.html?category=treat">Treat</a>
+        <a href="shop.html?category=hydrate">Hydrate</a>
+        <a href="shop.html?category=protect">Protect</a>
+        <a href="shop.html?category=sets">Sets</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="about.html">Our story</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="cart.html">Cart</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 ELMA. A daily ritual, reconsidered.</div>
+    <div>Demo storefront — no orders are fulfilled and no payments are processed.</div>
+  </div>
+</footer>
+
+<script src="assets/js/products.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
