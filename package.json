@@ -1,0 +1,13 @@
+{
+  "name": "elma-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ELMA — static skin care storefront. No build step; the dev dependency is for the test suite only.",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node test/site.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^27.0.0"
+  }
+}
