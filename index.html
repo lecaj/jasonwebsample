@@ -87,7 +87,7 @@
   </div>
 </section>
 
-<section class="section" style="padding-top:0">
+<section class="section" id="range" style="padding-top:0">
   <div class="section-head">
     <div class="section-eyebrow">The range</div>
     <h2>Seven products. Nothing that exists just to fill a shelf.</h2>
@@ -98,29 +98,39 @@
   </p>
 </section>
 
-<section class="ritual" id="ritual">
-  <div class="ritual-copy">
-    <div class="section-eyebrow">The ritual</div>
-    <h2>Four minutes, before anything else demands your attention.</h2>
-    <p>ELMA started as a morning powder — one glass, every day, no compromise. The skin care line is the same idea applied outward: a short sequence you can do half-asleep, that works because you never skip it.</p>
-    <p style="margin-top:18px"><a class="btn-outline" href="product.html?id=the-daily-ritual-set" style="border-color:var(--blush);color:var(--blush)">Shop the routine set</a></p>
-  </div>
-  <div class="steps">
-    <div class="step">
-      <div class="step-index">01</div>
-      <div class="step-text"><h4>Cleanse</h4><p>Morning Dew, thirty seconds, no squeak afterwards.</p></div>
+<!-- ASHA-20 — #ritual is the scroll driver for the pinned-ritual effect:
+     styles.css grows it tall (--step-count x 100vh) only once a browser
+     proves it can run animation-timeline: view() (the @supports gate), or
+     once motion.js's fallback arms it for browsers that can't. The id stays
+     on this outer element so the nav's #ritual anchor still lands here.
+     Neither this wrapper nor the unqualified base rules for .ritual/
+     .ritual-copy/.steps/.step below are gated — with no CSS support and no
+     JS this renders exactly as it always has (today's triggered reveal). -->
+<section id="ritual" style="--step-count:4">
+  <div class="ritual">
+    <div class="ritual-copy">
+      <div class="section-eyebrow">The ritual</div>
+      <h2>Four minutes, before anything else demands your attention.</h2>
+      <p>ELMA started as a morning powder — one glass, every day, no compromise. The skin care line is the same idea applied outward: a short sequence you can do half-asleep, that works because you never skip it.</p>
+      <p style="margin-top:18px"><a class="btn-outline" href="product.html?id=the-daily-ritual-set" style="border-color:var(--blush);color:var(--blush)">Shop the routine set</a></p>
     </div>
-    <div class="step">
-      <div class="step-index">02</div>
-      <div class="step-text"><h4>Hydrate</h4><p>Quiet Hour, pressed into damp skin so the water has somewhere to go.</p></div>
-    </div>
-    <div class="step">
-      <div class="step-index">03</div>
-      <div class="step-text"><h4>Seal</h4><p>Second Skin, a pea-sized amount, ceramides at the ratio skin builds from.</p></div>
-    </div>
-    <div class="step">
-      <div class="step-index">04</div>
-      <div class="step-text"><h4>Protect</h4><p>Daybreak SPF 40. The step that decides whether the other three were worth doing.</p></div>
+    <div class="steps">
+      <div class="step" style="--i:0">
+        <div class="step-index">01</div>
+        <div class="step-text"><h4>Cleanse</h4><p>Morning Dew, thirty seconds, no squeak afterwards.</p></div>
+      </div>
+      <div class="step" style="--i:1">
+        <div class="step-index">02</div>
+        <div class="step-text"><h4>Hydrate</h4><p>Quiet Hour, pressed into damp skin so the water has somewhere to go.</p></div>
+      </div>
+      <div class="step" style="--i:2">
+        <div class="step-index">03</div>
+        <div class="step-text"><h4>Seal</h4><p>Second Skin, a pea-sized amount, ceramides at the ratio skin builds from.</p></div>
+      </div>
+      <div class="step" style="--i:3">
+        <div class="step-index">04</div>
+        <div class="step-text"><h4>Protect</h4><p>Daybreak SPF 40. The step that decides whether the other three were worth doing.</p></div>
+      </div>
     </div>
   </div>
 </section>
