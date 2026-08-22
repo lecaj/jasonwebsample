@@ -45,7 +45,12 @@
     { sel: '.hero-eyebrow' },
     { sel: '.hero p' },
     { sel: '.hero-actions' },
-    { sel: '.hero-visual' },
+    // Pins are rendered into .hero-product by the inline boot script, so
+    // they reveal as part of that one group rather than getting their own
+    // per-pin stagger — .hero-product is present at parse time and already
+    // covers "the product block fades in as one moment".
+    { sel: '.hero-product' },
+    { sel: '.hero-stat-rail > .stat', stagger: 60 },
     { sel: '.pillars > .pillar', stagger: 80 },
     { sel: '.product-grid > .product-card', stagger: 70 },
     { sel: '.ritual-copy' },
@@ -88,6 +93,25 @@
     el.setAttribute('data-reveal', 'in');
     // will-change was only ever needed for the pending->in transition.
     window.setTimeout(function () { el.style.willChange = ''; }, 1000);
+    revealNumbers(el);
+  }
+
+  // The hero stat rail starts each number at 0 (see index.html) so it has
+  // somewhere to count up *from*. On reveal, swap in the real value and let
+  // the existing armNumbers()/countTo() below animate it — no new easing or
+  // observer code, just handing the existing counter its target at the
+  // moment it becomes visible instead of at page load. `el` is whatever the
+  // reveal group targeted, which may be the counter itself or a wrapper
+  // around it (e.g. `.hero-stat-rail > .stat`).
+  function revealNumbers(el) {
+    var targets = (el.hasAttribute && el.hasAttribute('data-number-target')) ? [el] : [];
+    if (el.querySelectorAll) targets = targets.concat($$('[data-number-target]', el));
+    if (!targets.length) return;
+    targets.forEach(function (t) { t.setAttribute('data-number-value', t.getAttribute('data-number-target')); });
+    // Full-document rescan rather than trying to resolve the right ancestor
+    // for both "el is the counter" and "el wraps the counter" cases — the
+    // whole page only ever has a handful of [data-number] elements.
+    armNumbers(document);
   }
 
   function armReveals(root) {
@@ -357,6 +381,8 @@
   var lastNumbers = new Map();
 
   function money(n) { return '$' + (Math.round(n * 100) / 100).toFixed(2); }
+  function percent(n) { return Math.round(n) + '%'; }
+  function plain(n) { return String(Math.round(n)); }
 
   function countTo(el, key, to, format) {
     var from = lastNumbers.has(key) ? lastNumbers.get(key) : to;
@@ -376,14 +402,14 @@
     requestAnimationFrame(frame);
   }
 
+  var NUMBER_FORMATS = { money: money, percent: percent };
+
   function armNumbers(root) {
     $$('[data-number]', root).forEach(function (el) {
       var key = el.getAttribute('data-number');
       var to = parseFloat(el.getAttribute('data-number-value'));
       if (isNaN(to)) return;
-      countTo(el, key, to, el.getAttribute('data-number-format') === 'money'
-        ? money
-        : function (n) { return String(Math.round(n)); });
+      countTo(el, key, to, NUMBER_FORMATS[el.getAttribute('data-number-format')] || plain);
     });
   }
 

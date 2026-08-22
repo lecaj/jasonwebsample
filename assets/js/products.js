@@ -85,6 +85,18 @@
       size: '30 ml',
       form: 'dropper',
       badge: 'Bestseller',
+      /* Exact three the hero annotates — see products.js "spec pins" section
+         below for how a product without an explicit list gets one derived.
+         All three point right: the hero pulls the bottle left so its left
+         edge crosses under the headline (see .hero-product in styles.css),
+         and a left-pointing label there would run straight into the copy
+         column — right avoids that structurally rather than by eyeballing
+         one viewport width. */
+      specPins: [
+        { label: 'Niacinamide 4%', x: 84, y: 20, side: 'right' },
+        { label: 'Fragrance-free', x: 84, y: 50, side: 'right' },
+        { label: 'pH 5.5', x: 84, y: 80, side: 'right' }
+      ],
       tagline: 'Five weights of hyaluronic acid, one very calm result.',
       description:
         'Single-weight hyaluronic acid sits on top and evaporates. Quiet Hour uses five molecular weights so hydration lands at different depths and actually stays. Niacinamide steadies tone and oil, and the whole thing layers under cream or makeup without pilling.',
@@ -330,6 +342,64 @@
       .replace(/"/g, '&quot;');
   }
 
+  /* --- spec pins -----------------------------------------------------
+     The hero (and later the PDP) annotates the bottle with the dose —
+     ELMA's answer to Nuve's face annotations. A product can supply an
+     explicit `specPins` list (see quiet-hour-serum above); everything else
+     falls back to a derived list built only from facts already on the
+     product record — its two most specific-sounding ingredients plus its
+     scent claim — so nothing here is invented copy.
+
+     Each pin is { label, x, y, side }: x/y are percent positions within
+     the product-art box, side picks which way the leader + label extend.
+  --------------------------------------------------------------------- */
+  function defaultSpecPins(product) {
+    var dosed = (product.ingredients || [])
+      .map(function (i) { return i.name; })
+      .filter(function (name) { return /\d/.test(name); });
+    var rest = (product.ingredients || [])
+      .map(function (i) { return i.name; })
+      .filter(function (name) { return dosed.indexOf(name) === -1; });
+    var picks = dosed.concat(rest).slice(0, 2);
+
+    var labels = [picks[0], product.scent, picks[1]].filter(Boolean);
+    // All three point right, same reasoning as quiet-hour-serum's explicit
+    // list above: the hero pulls the bottle left to cross the headline, and
+    // a left-pointing label there would land on the copy column.
+    var slots = [
+      { x: 84, y: 20, side: 'right' },
+      { x: 84, y: 50, side: 'right' },
+      { x: 84, y: 80, side: 'right' }
+    ];
+    return labels.map(function (label, i) {
+      var slot = slots[i] || slots[slots.length - 1];
+      return { label: label, x: slot.x, y: slot.y, side: slot.side };
+    });
+  }
+
+  function getSpecPins(product) {
+    if (!product) return [];
+    return (product.specPins && product.specPins.length) ? product.specPins : defaultSpecPins(product);
+  }
+
+  /**
+   * Render the <li> items for a product's spec-pin list. The caller supplies
+   * the wrapping <ul class="spec-pins">; below 700px that same markup
+   * collapses to a caption list purely in CSS — no alternate template.
+   */
+  function specPins(product) {
+    return getSpecPins(product).slice(0, 3).map(function (pin) {
+      return (
+        '<li class="spec-pin" data-side="' + esc(pin.side || 'right') + '" ' +
+          'style="--pin-x:' + Number(pin.x) + '%;--pin-y:' + Number(pin.y) + '%">' +
+          '<span class="spec-pin-mark" aria-hidden="true"></span>' +
+          '<span class="spec-pin-leader" aria-hidden="true"></span>' +
+          '<span class="spec-pin-label">' + esc(pin.label) + '</span>' +
+        '</li>'
+      );
+    }).join('');
+  }
+
   /* --- fallback artwork ------------------------------------------------
      The original inline-SVG shapes. No longer used for product media, but
      kept as a resolution-independent stand-in for any slot that needs one.
@@ -399,6 +469,8 @@
   window.ELMA.art = art;
   window.ELMA.picture = picture;
   window.ELMA.imageVariants = VARIANTS;
+  window.ELMA.getSpecPins = getSpecPins;
+  window.ELMA.specPins = specPins;
   window.ELMA.getProduct = function (id) {
     for (var i = 0; i < PRODUCTS.length; i++) {
       if (PRODUCTS[i].id === id) return PRODUCTS[i];
