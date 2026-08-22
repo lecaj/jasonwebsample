@@ -39,6 +39,11 @@ function fakeIO(w) {
       });
     },
     observedCount: () => instances.reduce((n, io) => n + io.targets.size, 0),
+    // Per-element rather than a global count, so an independent, deliberately
+    // persistent observer (the ASHA-21 scrub fallback watches #ritual for as
+    // long as the page can scroll) doesn't read as a leaked one-shot reveal
+    // observation.
+    observes: el => instances.some(io => io.targets.has(el)),
   };
 }
 
@@ -111,7 +116,7 @@ console.log('\n— motion: scroll reveal —');
 
   io.triggerAll();
   ok(heads.every(el => el.getAttribute('data-reveal') === 'in'), 'reveal on intersection');
-  ok(io.observedCount() === 0, 'each element is unobserved once revealed (fires once)');
+  ok(heads.every(el => !io.observes(el)), 'each element is unobserved once revealed (fires once)');
 }
 {
   // The regression that matters most: if the observer is unavailable, content
@@ -336,6 +341,56 @@ console.log('\n— motion: dynamic content —');
   ok(cards.every(c => c.hasAttribute('data-reveal')), 'filtered-in cards are armed for reveal');
 }
 
+console.log('\n— motion: scrubbed scroll (ASHA-21) —');
+{
+  // jsdom implements neither animation-timeline nor real layout, so loading
+  // the page here exercises exactly the mandatory JS fallback path — the
+  // one browsers without native scroll-driven animation support fall back
+  // to. The native @supports (animation-timeline: view()) path is pure CSS
+  // and is covered lower down, in the css token contract section.
+  const { w, d } = await load('index.html');
+
+  ok(!!d.querySelector('#ritual .ritual') && !!d.querySelector('#ritual .ritual-copy')
+    && !!d.querySelector('#ritual .steps'),
+    'pinned-ritual wrapper present: #ritual wraps .ritual, which still holds .ritual-copy and .steps');
+  const steps = [...d.querySelectorAll('#ritual .step')];
+  ok(steps.length === 4 && steps.every((s, i) => s.style.getPropertyValue('--i') === String(i)),
+    'each step carries its index for the animation-range slice (' + steps.length + ')');
+  ok(d.getElementById('ritual').style.getPropertyValue('--step-count') === '4',
+    '#ritual declares --step-count matching the actual number of steps');
+
+  ok(d.documentElement.getAttribute('data-scrub') === 'fallback',
+    'no animation-timeline support in jsdom: JS fallback arms itself');
+
+  const track = d.getElementById('ritual');
+  const vh = w.innerHeight;
+  const trackHeight = vh * steps.length;
+  // Scrolled to the midpoint of step 0's own quarter of the track.
+  track.getBoundingClientRect = () => ({ top: -(trackHeight - vh) * (0.5 / steps.length), height: trackHeight });
+  w.dispatchEvent(new w.Event('scroll'));
+  await frames(w, 2);
+  ok(parseFloat(steps[0].style.opacity) > 0.9 && steps[0].style.transform.includes('0px'),
+    'step 0 is fully in at the midpoint of its own slice (opacity ' + steps[0].style.opacity + ')');
+  ok(parseFloat(steps[1].style.opacity) === 0, 'step 1 has not started yet (opacity ' + steps[1].style.opacity + ')');
+
+  // Scroll back to the very top: the fallback must reverse cleanly, not
+  // just play forward once — this is the "advances and reverses" acceptance
+  // criterion, exercised on the JS path.
+  track.getBoundingClientRect = () => ({ top: 0, height: trackHeight });
+  w.dispatchEvent(new w.Event('scroll'));
+  await frames(w, 2);
+  ok(steps.every(s => parseFloat(s.style.opacity) === 0),
+    'scrolling back to the top reverses every step to hidden');
+}
+{
+  const { d } = await load('index.html', { reduce: true });
+  ok(d.documentElement.getAttribute('data-scrub') !== 'fallback',
+    'reduced motion: JS fallback never arms');
+  const steps = [...d.querySelectorAll('#ritual .step')];
+  ok(steps.every(s => s.style.opacity === '' && s.style.transform === ''),
+    'reduced motion: steps carry no inline scrub styles — the CSS reduced-motion block owns the end state');
+}
+
 console.log('\n— motion: css token contract —');
 {
   const css = read('assets/css/motion.css');
@@ -388,6 +443,39 @@ console.log('\n— motion: css token contract —');
     'styles.css no longer hard-hides accordion panels (would defeat the height animation)');
   ok(!/\.acc-panel\[data-open="true"\]\{display:block/.test(styles),
     'no display override fighting the grid-rows animation');
+}
+{
+  // ASHA-21 — the pinned ritual lives in styles.css, gated behind
+  // @supports (animation-timeline: view()) with a JS-armed data-scrub
+  // fallback for everything else, per the non-negotiables in the ticket.
+  const styles = read('assets/css/styles.css');
+  ok(/@supports \(animation-timeline: view\(\)\)/.test(styles),
+    'scrubbed motion is progressively enhanced behind @supports (animation-timeline: view())');
+  ok(/view-timeline-name:\s*--ritual-progress/.test(styles),
+    'pinned ritual drives its steps off a named view-timeline');
+  ok(/html\[data-scrub="fallback"\]/.test(styles),
+    'a JS-armed [data-scrub="fallback"] path exists for browsers @supports rejects');
+
+  const supportsBlock = styles.slice(
+    styles.indexOf('@supports (animation-timeline: view()){\n  #ritual'));
+  ok(/animation-range:/.test(supportsBlock), 'each pinned step gets its own animation-range slice');
+
+  // Compositor-only, per the ticket: nothing animated here may be a
+  // property that triggers layout. Check every declaration inside the new
+  // @keyframes block, not just skim for the word "transform".
+  const m = styles.match(/@keyframes ritual-step-beat\{([\s\S]*?)\n  \}/);
+  ok(!!m, '@keyframes ritual-step-beat present');
+  const props = [...(m ? m[1] : '').matchAll(/([a-z-]+):/g)].map(x => x[1]);
+  const offenders = props.filter(p => p !== 'opacity' && p !== 'transform');
+  ok(props.length > 0 && offenders.length === 0,
+    '@keyframes ritual-step-beat only animates compositor-safe properties (' + offenders.join(',') + ')');
+
+  // Reduced motion must collapse the effect to a static end state — the
+  // same house rule the rest of motion.css already enforces.
+  const reducedBlocks = [...styles.matchAll(/@media \(prefers-reduced-motion:reduce\)\{([\s\S]*?)\n\}/g)]
+    .map(x => x[1]).join('\n');
+  ok(/#ritual\b/.test(reducedBlocks) && /animation:none\s*!important/.test(reducedBlocks),
+    'reduced motion collapses the pinned ritual to its static end state');
 }
 {
   // Every page must ship both halves of the motion layer.
