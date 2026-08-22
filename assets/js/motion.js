@@ -406,6 +406,121 @@
   }
 
   /* ======================================================================
+     9. SCRUBBED SCROLL (ASHA-20 — pinned ritual, range lineup drift)
+
+     The native path is pure CSS: styles.css drives the pinned ritual and
+     the lineup drift with animation-timeline: view()/named view-timelines,
+     gated behind @supports (animation-timeline: view()). This file does
+     nothing while that gate is open — the effect runs entirely on the
+     compositor and needs no JS at all.
+
+     This section is the mandatory fallback for browsers where that gate is
+     closed (Firefox, at the time of writing). It approximates the same
+     progress curve with IntersectionObserver + requestAnimationFrame and
+     writes it as inline opacity/transform/translate each frame. It flips
+     [data-scrub="fallback"] on <html>, which is what arms the matching
+     *layout* rules in styles.css (the sticky stage, the tall track, the
+     stacked steps) — this file only supplies the per-frame values.
+     ====================================================================== */
+
+  function scrollTimelineSupported() {
+    return !!(window.CSS && CSS.supports && CSS.supports('animation-timeline', 'view()'));
+  }
+
+  function clamp01(n) { return n < 0 ? 0 : n > 1 ? 1 : n; }
+
+  // Mirrors @keyframes ritual-step-beat in styles.css stop-for-stop, so the
+  // native and fallback paths read as the same animation: hold out of view
+  // through 6% of the slice, fade+slide in by 18%, hold through 82%, then
+  // fade+slide out by 94%.
+  function beatEnvelope(p) {
+    if (p < 0.06) return { o: 0, y: 32 };
+    if (p < 0.18) { var t = (p - 0.06) / 0.12; return { o: t, y: 32 * (1 - t) }; }
+    if (p < 0.82) return { o: 1, y: 0 };
+    if (p < 0.94) { var t2 = (p - 0.82) / 0.12; return { o: 1 - t2, y: -32 * t2 }; }
+    return { o: 0, y: -32 };
+  }
+
+  var scrubTeardown = null;
+
+  function armScrubFallback() {
+    if (scrubTeardown || reduced() || scrollTimelineSupported()) return;
+
+    var track = document.getElementById('ritual');
+    var steps = track ? $$('.step', track) : [];
+    var lineupSection = document.getElementById('range');
+    var lineupCards = lineupSection ? $$('.product-grid > .product-card', lineupSection) : [];
+    if (!steps.length && !lineupCards.length) return;
+
+    document.documentElement.setAttribute('data-scrub', 'fallback');
+
+    // Gate the scroll/rAF work behind IntersectionObserver so it only runs
+    // while one of the two scrubbed regions is actually near the viewport —
+    // this is a full-page scroll listener otherwise, and the whole point of
+    // the native path is staying off the main thread.
+    var active = !('IntersectionObserver' in window);
+    var io = null;
+    if (!active) {
+      io = new IntersectionObserver(function (entries) {
+        active = entries.some(function (e) { return e.isIntersecting; });
+        if (active) schedule();
+      }, { rootMargin: '25% 0px' });
+      if (track) io.observe(track);
+      if (lineupSection) io.observe(lineupSection);
+    }
+
+    var ticking = false;
+    function schedule() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; if (active) frame(); });
+    }
+
+    function frame() {
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+
+      if (steps.length) {
+        var rect = track.getBoundingClientRect();
+        var span = rect.height - vh;
+        // Above the tall track: 0. Past it: 1. Matches the "cover" progress
+        // the native path's view() timeline would report at the same scroll
+        // position, so both paths reverse identically on scroll-back too.
+        var progress = span > 0 ? clamp01(-rect.top / span) : (rect.top < 0 ? 1 : 0);
+        var n = steps.length;
+        steps.forEach(function (step, i) {
+          var beat = beatEnvelope(clamp01(progress * n - i));
+          step.style.opacity = String(beat.o);
+          step.style.transform = 'translate3d(0,' + beat.y.toFixed(1) + 'px,0)';
+        });
+      }
+
+      lineupCards.forEach(function (card) {
+        var r = card.getBoundingClientRect();
+        // -1 (fully below the fold) to 1 (fully above it) — the same "an
+        // element's own pass through the viewport" progress a view()
+        // timeline reports, cheaply approximated from its own rect.
+        var p = clamp01(1 - (r.top + r.height / 2) / (vh + r.height)) * 2 - 1;
+        var drift = parseFloat(getComputedStyle(card).getPropertyValue('--drift')) || 0;
+        card.style.translate = (drift * p).toFixed(1) + 'px 0';
+      });
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    schedule();
+
+    scrubTeardown = function () {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      if (io) io.disconnect();
+      document.documentElement.removeAttribute('data-scrub');
+      steps.forEach(function (step) { step.style.opacity = ''; step.style.transform = ''; });
+      lineupCards.forEach(function (card) { card.style.translate = ''; });
+      scrubTeardown = null;
+    };
+  }
+
+  /* ======================================================================
      BOOT
      ====================================================================== */
 
@@ -430,12 +545,14 @@
     initScrollProgress();
     initCartBump();
     scan(document);
+    armScrubFallback();
 
     // Turning reduced-motion on mid-session should take effect without a
     // reload, and must not strand anything mid-reveal.
     var onPref = function () {
       if (!reduced()) return;
       $$('[data-reveal="pending"]').forEach(show);
+      if (scrubTeardown) scrubTeardown();
     };
     if (reduceQuery.addEventListener) reduceQuery.addEventListener('change', onPref);
     else if (reduceQuery.addListener) reduceQuery.addListener(onPref);
