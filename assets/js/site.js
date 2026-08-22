@@ -454,6 +454,7 @@
       '</div>';
 
     initSteppers(root);
+    initMobileBuyBar(product);
 
     // "Pairs with" — same-category siblings, then fill from the rest.
     var related = $('[data-related-grid]');
@@ -468,6 +469,62 @@
     }
 
     rescan(document);
+  }
+
+  /* ---------- mobile buy bar ----------
+     Below 900px the desktop sticky media column (see .pdp-media in
+     styles.css) is dropped and the buy affordance — name, price, add to
+     cart — would scroll away with it. This restores a persistent version:
+     a fixed bottom bar that appears once the real .pdp-buy block scrolls
+     out of view, and yields before the footer so it never sits on top of
+     it. Reuses the existing [data-add-to-cart] delegation (initAddToCart)
+     and toast, so add-to-cart behaviour and its aria-live announcement are
+     unchanged — this is a new entry point, not new cart logic. */
+  function initMobileBuyBar(product) {
+    var bar = $('[data-mobile-buy-bar]');
+    var buyBlock = $('.pdp-buy');
+    if (!product || !bar || !buyBlock) return;
+
+    bar.hidden = false;
+    $('[data-mobile-buy-name]', bar).textContent = product.name;
+    $('[data-mobile-buy-price]', bar).textContent = money(product.price);
+    var cta = $('[data-mobile-buy-cta]', bar);
+    cta.setAttribute('data-add-to-cart', product.id);
+    cta.setAttribute('aria-label', 'Add ' + product.name + ' to cart — ' + money(product.price));
+
+    // No IntersectionObserver support: rather than guess at scroll math,
+    // leave the bar hidden. The desktop-width buy block is still reachable
+    // by scrolling up, same as before this feature existed.
+    if (!('IntersectionObserver' in window)) return;
+
+    var buyBlockOut = false; // main buy block has scrolled above the viewport
+    var nearFooter = false;  // footer is close enough to overlap the bar
+
+    function sync() {
+      var visible = buyBlockOut && !nearFooter;
+      bar.setAttribute('data-visible', visible ? 'true' : 'false');
+      document.body.setAttribute('data-mobile-buy-visible', visible ? 'true' : 'false');
+    }
+
+    new IntersectionObserver(function (entries) {
+      var entry = entries[entries.length - 1];
+      // isIntersecting alone can't tell "scrolled past" from "not reached
+      // yet" (both read as not-intersecting) — the bar must stay hidden on
+      // load until the block has actually scrolled above the viewport.
+      buyBlockOut = !entry.isIntersecting && entry.boundingClientRect.bottom <= 0;
+      sync();
+    }, { threshold: 0 }).observe(buyBlock);
+
+    var footer = $('.site-footer');
+    if (footer) {
+      // Positive bottom rootMargin fires this before the footer is actually
+      // on screen, giving the .28s hide transition time to finish first.
+      new IntersectionObserver(function (entries) {
+        var entry = entries[entries.length - 1];
+        nearFooter = entry.isIntersecting;
+        sync();
+      }, { threshold: 0, rootMargin: '0px 0px 240px 0px' }).observe(footer);
+    }
   }
 
   /* ---------- cart page ---------- */

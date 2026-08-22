@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Product — ELMA</title>
 <meta name="description" content="ELMA product details — full ingredient disclosure, active percentages, and how to use it.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -34,6 +34,18 @@
     <button class="nav-toggle" data-nav-toggle type="button" aria-expanded="false">Menu</button>
   </div>
 </nav>
+
+<!-- Persistent commerce bar (below 900px only) — appears once the buy block
+     above scrolls out of view, yields before the footer CTA. See
+     assets/js/site.js#initMobileBuyBar and the "MOBILE BUY BAR" block in
+     assets/css/styles.css. -->
+<div class="mobile-buy-bar" data-mobile-buy-bar hidden>
+  <p class="mobile-buy-bar-copy">
+    <span class="mobile-buy-bar-name" data-mobile-buy-name></span>
+    <span class="mobile-buy-bar-price" data-mobile-buy-price></span>
+  </p>
+  <button class="btn-primary" type="button" data-mobile-buy-cta data-qty-source="#pdp-qty">Add to cart</button>
+</div>
 
 <main id="main">
 
