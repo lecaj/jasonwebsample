@@ -138,9 +138,70 @@ console.log('\n— motion: scroll reveal —');
   ok(delays[0] === '' && delays[1] === '80ms' && delays[2] === '160ms',
     'siblings stagger by 80ms (' + delays.join(',') + ')');
 
-  const stats = [...d.querySelectorAll('.stat-row > .stat')];
-  ok(stats.map(el => el.style.getPropertyValue('--reveal-delay')).join(',') === ',60ms,120ms,180ms',
-    'stat row staggers by 60ms');
+  // ASHA-15: 3 of the 4 stats moved into the hero rail; the below-the-fold
+  // row now carries just the one that stayed (money-back guarantee).
+  const belowFoldStats = [...d.querySelectorAll('.stat-row > .stat')];
+  ok(belowFoldStats.length === 1, 'below-the-fold stat row now carries the one stat that stayed (got '
+    + belowFoldStats.length + ')');
+
+  const railStats = [...d.querySelectorAll('.hero-stat-rail > .stat')];
+  ok(railStats.map(el => el.style.getPropertyValue('--reveal-delay')).join(',') === ',60ms,120ms',
+    'hero stat rail staggers by 60ms');
+}
+
+console.log('\n— motion: hero stat rail count-up —');
+{
+  // Not triggered: the rail is still pending, so it must not have jumped
+  // to its real values yet — that would defeat the count-up on reveal.
+  const { d } = await load('index.html', { io: true });
+  const counters = [...d.querySelectorAll('.hero-stat-rail [data-number]')];
+  ok(counters.length === 3, 'hero stat rail renders 3 counters (got ' + counters.length + ')');
+  ok(counters.every(el => el.getAttribute('data-number-value') === '0' && el.textContent === (
+    el.getAttribute('data-number-format') === 'percent' ? '0%' : '0')),
+    'counters start at 0 with a real data-number-target to count up to');
+  ok(counters.map(el => el.getAttribute('data-number-target')).join(',') === '7,0,100',
+    'targets match the page stats (' + counters.map(el => el.getAttribute('data-number-target')).join(',') + ')');
+}
+{
+  // Reveal fires -> show() hands the counters their targets -> the existing
+  // countTo() (unchanged) animates from the seeded 0.
+  const { d, io } = await load('index.html', { io: true });
+  io.triggerAll();
+  const counters = [...d.querySelectorAll('.hero-stat-rail [data-number]')];
+  ok(counters.every((el, i) => el.getAttribute('data-number-value') === el.getAttribute('data-number-target')),
+    'on reveal, each counter is handed its real target');
+}
+{
+  // Reduced motion: show() fires immediately (no observer wait) and
+  // countTo() renders the target with no animation — see motion.js countTo().
+  const { d } = await load('index.html', { io: true, reduce: true });
+  const counters = [...d.querySelectorAll('.hero-stat-rail [data-number]')];
+  ok(counters.map(el => el.textContent).join(',') === '7,0,100%',
+    'reduced motion: hero stats land on final values immediately (' + counters.map(el => el.textContent).join(',') + ')');
+}
+
+console.log('\n— motion: spec pins —');
+{
+  const { d } = await load('index.html', { io: true });
+  const pins = [...d.querySelectorAll('.spec-pins > .spec-pin')];
+  ok(pins.length === 3, 'hero renders exactly 3 spec pins (got ' + pins.length + ')');
+  ok(pins.every(el => el.style.getPropertyValue('--pin-x') && el.style.getPropertyValue('--pin-y')),
+    'every pin declares a position');
+  ok(pins.map(el => el.querySelector('.spec-pin-label').textContent).join(',')
+    === 'Niacinamide 4%,Fragrance-free,pH 5.5',
+    'pin copy matches the approved dose annotations');
+  ok(pins.every(el => el.querySelector('.spec-pin-mark').getAttribute('aria-hidden') === 'true'
+    && el.querySelector('.spec-pin-leader').getAttribute('aria-hidden') === 'true'),
+    'decorative mark + leader are hidden from assistive tech; the label text is not');
+  // Pins are injected content, not a static reveal target — they fade in
+  // as part of .hero-product's single reveal rather than their own group.
+  ok(d.querySelector('.hero-product').hasAttribute('data-reveal'),
+    '.hero-product (pins + art + pill) is armed for reveal as one unit');
+}
+{
+  const styles = read('assets/css/styles.css');
+  ok(/@media \(max-width:700px\)\{[\s\S]*?\.spec-pins\{[\s\S]*?position:static/.test(styles),
+    'below 700px, spec pins collapse to a static caption list rather than staying absolutely placed');
 }
 {
   // Stagger must plateau, or the last card in a long grid waits absurdly long.

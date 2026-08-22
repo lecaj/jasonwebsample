@@ -38,21 +38,46 @@
 <main id="main">
 
 <section class="hero">
-  <div class="hero-copy">
-    <div class="hero-eyebrow">Barrier-first · Fragrance-free · Dose-honest</div>
-    <h1>Skin care for the <em>morning</em> you actually have.</h1>
-    <p>Four steps, not twelve. Every active at a dose that does something, nothing added to make it smell like a spa. ELMA is built for skin you have to live in every day — not for a shelfie.</p>
-    <div class="hero-actions">
-      <a class="btn-primary" href="shop.html">Shop the range</a>
-      <a class="btn-secondary" href="#pillars">Why four steps</a>
+  <div class="hero-stage">
+    <div class="hero-crossing">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">Barrier-first · Fragrance-free · Dose-honest</div>
+        <h1>Skin care for the <em>morning</em> you actually have.</h1>
+        <p>Four steps, not twelve. Every active at a dose that does something, nothing added to make it smell like a spa. ELMA is built for skin you have to live in every day — not for a shelfie.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="shop.html">Shop the range</a>
+          <a class="btn-secondary" href="#pillars">Why four steps</a>
+        </div>
+      </div>
+
+      <div class="hero-product">
+        <div class="hero-glow" aria-hidden="true">
+          <div class="hero-bloom"></div>
+          <div class="hero-arc"></div>
+        </div>
+        <div class="hero-art" id="hero-art"></div>
+        <ul class="spec-pins" data-spec-pins></ul>
+        <div class="proof-pill">
+          <span class="avatar-stack" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span>4.9 · 2,300 routines</span>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="hero-visual">
-    <div class="ring ring2"></div>
-    <div class="ring"></div>
-    <div class="hero-art" id="hero-art"></div>
-    <div class="float-badge fb1">✓ Dermatologist tested</div>
-    <div class="float-badge fb2">4.9 · 2,300 routines</div>
+
+    <div class="hero-stat-rail">
+      <div class="stat">
+        <div class="stat-value" data-number="hero-stat-products" data-number-value="0" data-number-target="7">0</div>
+        <div class="stat-label">Products in the full range</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" data-number="hero-stat-fragrance" data-number-value="0" data-number-target="0">0</div>
+        <div class="stat-label">Added fragrance, anywhere</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" data-number="hero-stat-disclosed" data-number-format="percent" data-number-value="0" data-number-target="100">0%</div>
+        <div class="stat-label">Percentages disclosed</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -139,10 +164,10 @@
 </section>
 
 <section class="section-tight">
-  <div class="stat-row">
-    <div class="stat"><div class="stat-value">7</div><div class="stat-label">Products in the full range</div></div>
-    <div class="stat"><div class="stat-value">0</div><div class="stat-label">Added fragrance, anywhere</div></div>
-    <div class="stat"><div class="stat-value">100%</div><div class="stat-label">Percentages disclosed</div></div>
+  <!-- The other three of these four now live in the hero's stat rail
+       (see .hero-stat-rail) — this is the one that stays below, closer to
+       the newsletter CTA where a purchase reassurance earns its place. -->
+  <div class="stat-row stat-row--single">
     <div class="stat"><div class="stat-value">60d</div><div class="stat-label">Money-back guarantee</div></div>
   </div>
 </section>
@@ -204,6 +229,11 @@
   document.getElementById('hero-art').innerHTML = ELMA.picture(
     ELMA.getProduct('quiet-hour-serum'), 'cutout',
     { sizes: '(max-width:476px) 42vw, 200px', eager: true }
+  );
+  /* Spec pins annotate that same bottle with its dose — data-driven off
+     ELMA.getProduct so the identical call works on the PDP later. */
+  document.querySelector('[data-spec-pins]').innerHTML = ELMA.specPins(
+    ELMA.getProduct('quiet-hour-serum')
   );
   document.getElementById('ingredient-art').innerHTML = ELMA.picture(
     ELMA.getProduct('second-skin-cream'), 'square',
