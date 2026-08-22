@@ -485,6 +485,49 @@ nav.site-nav{
   .pdp-media{position:relative;top:auto;}
 }
 
+/* ---------- MOBILE BUY BAR ----------
+   The persistent commerce affordance the desktop sticky media column loses
+   below 900px. Lives in the DOM near the nav (not at the end of body) so a
+   keyboard user reaches it in a couple of tabs instead of after the whole
+   page — visibility:hidden keeps it out of the tab order until JS reveals
+   it, regardless of where it sits on screen. Hidden entirely at desktop
+   widths; JS only toggles [data-visible] below 900px. */
+.mobile-buy-bar{display:none;}
+@media (max-width:900px){
+  .mobile-buy-bar[hidden]{display:none;}
+  .mobile-buy-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    position:fixed;left:0;right:0;bottom:0;z-index:70;
+    background:rgba(250,246,239,0.96);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    box-shadow:0 -12px 30px rgba(74,28,40,0.12);
+    padding:14px 5vw calc(14px + env(safe-area-inset-bottom,0px));
+    visibility:hidden;transform:translateY(100%);
+    transition:transform .28s ease,visibility 0s linear .28s;
+  }
+  .mobile-buy-bar[data-visible="true"]{
+    visibility:visible;transform:translateY(0);
+    transition:transform .28s ease;
+  }
+  .mobile-buy-bar-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .mobile-buy-bar-name{
+    font-family:'Fraunces',serif;font-size:0.98rem;color:var(--wine-deep);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .mobile-buy-bar-price{font-size:0.85rem;color:var(--ink-soft);}
+  .mobile-buy-bar .btn-primary{
+    padding:13px 26px;font-size:0.85rem;flex:none;white-space:nowrap;
+  }
+  /* A toast fired from this bar's CTA should sit above it, not behind it. */
+  body[data-mobile-buy-visible="true"] .toast-stack{
+    bottom:calc(64px + env(safe-area-inset-bottom,0px) + 26px);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .mobile-buy-bar{transition:none;}
+  .mobile-buy-bar[data-visible="true"]{transition:none;}
+}
+
 /* ---------- CART ---------- */
 .cart-layout{display:grid;grid-template-columns:1.6fr 1fr;gap:56px;align-items:start;}
 .cart-line{
