@@ -429,6 +429,111 @@ nav.site-nav{
 .step-text p{font-size:0.86rem;color:rgba(244,237,226,0.65);line-height:1.5;}
 @media (max-width:860px){.ritual{grid-template-columns:1fr;padding:60px 8vw;gap:36px;}}
 
+/* ---------- RITUAL: PINNED SCRUB (ASHA-21 — scroll-linked motion, move 1) ----------
+   #ritual is a plain block by default: the rules above render .ritual/.
+   ritual-copy/.steps/.step exactly as before, and that is deliberately also
+   our "no CSS support" and "no JS" fallback — nothing below ever changes
+   what ships to a browser that can't run it.
+
+   Two paths turn the pin on, and both target the SAME resulting layout —
+   duplicated rather than shared because this site has no build step to
+   factor a mixin out of:
+
+   1. @supports (animation-timeline: view()) — pure CSS, works with JS
+      disabled, in any browser that implements the feature.
+   2. html[data-scrub="fallback"] — set by motion.js only when (1) is not
+      supported, driving the identical layout with rAF-computed inline
+      styles instead of a native view-timeline. See assets/js/motion.js
+      §9 SCRUBBED SCROLL.
+
+   The technique: #ritual grows to (--step-count x 100vh) so scrolling
+   through it takes N screens; .ritual — the original two-column box — goes
+   position:sticky inside that tall well, so it stays pinned to the
+   viewport for the whole pass; .steps stacks its children into one grid
+   cell (grid-area:1/1) so they sit on top of each other instead of in a
+   list; each .step then owns an equal 1/N slice of #ritual's scroll-through
+   (its own view-timeline progress) to fade/slide in, hold, and fade out —
+   the "three beats" (here four, matching the actual step count) advancing
+   and reversing as you scroll. */
+@supports (animation-timeline: view()){
+  #ritual{
+    height:calc(var(--step-count, 4) * 100vh);
+    view-timeline-name: --ritual-progress;
+    view-timeline-axis: block;
+  }
+  #ritual .ritual{position:sticky;top:0;height:100vh;}
+  #ritual .steps{display:grid;}
+  #ritual .step{
+    grid-area:1/1;align-self:center;border-bottom:none;
+    opacity:0;transform:translate3d(0, 32px, 0);
+    animation:ritual-step-beat linear both;
+    animation-timeline: --ritual-progress;
+    /* Equal 1/N slice of the full 0%-100% scroll-through, per --i. A modest
+       share at each end of #ritual's total pass is the entry/exit ramp
+       rather than the fully-pinned window — the first step's fade-in
+       starts a little before the section is completely pinned and the
+       last step's fade-out finishes a little after it starts releasing.
+       That's an intentional trade-off: computing the exact pinned-only
+       window depends on the sticky offset matching 100vh precisely, which
+       drifts with mobile browser chrome (dynamic viewport height); this
+       formula has no such dependency and stays correct at any viewport. */
+    animation-range:
+      calc(var(--i, 0) * 100% / var(--step-count, 4))
+      calc((var(--i, 0) + 1) * 100% / var(--step-count, 4));
+  }
+  @keyframes ritual-step-beat{
+    0%   {opacity:0;transform:translate3d(0, 32px, 0);}
+    6%   {opacity:0;transform:translate3d(0, 32px, 0);}
+    18%  {opacity:1;transform:translate3d(0, 0, 0);}
+    82%  {opacity:1;transform:translate3d(0, 0, 0);}
+    94%  {opacity:0;transform:translate3d(0, -32px, 0);}
+    100% {opacity:0;transform:translate3d(0, -32px, 0);}
+  }
+  @media (max-width:860px){
+    /* Copy + four beats can't both fit pinned in one 100vh box below the
+       fold width the plan calls out — the copy would either clip or force
+       the pin to release mid-sentence. So only .steps pins at this width;
+       .ritual-copy scrolls past normally above it, same as it reads today.
+       .ritual keeps #ritual's full track height (not auto) here — a sticky
+       child only stays stuck for as long as *its own containing block* is
+       tall, and .ritual is that containing block for .steps. Auto-height
+       made .ritual only as tall as the copy + one 100vh step box, so .steps
+       lost its sticky offset and scrolled off long before the track — the
+       4-screen scroll-through — actually finished, leaving blank space for
+       the remaining beats. Matching #ritual's height keeps .steps pinned
+       for the section's whole scroll-through, same as the desktop path. */
+    #ritual .ritual{position:static;height:calc(var(--step-count, 4) * 100vh);display:block;padding:60px 8vw 0;}
+    #ritual .steps{position:sticky;top:0;height:100vh;padding:0 8vw;}
+  }
+}
+html[data-scrub="fallback"] #ritual{height:calc(var(--step-count, 4) * 100vh);}
+html[data-scrub="fallback"] #ritual .ritual{position:sticky;top:0;height:100vh;}
+html[data-scrub="fallback"] #ritual .steps{display:grid;}
+html[data-scrub="fallback"] #ritual .step{
+  grid-area:1/1;align-self:center;border-bottom:none;
+  will-change:opacity, transform; /* motion.js writes both every animation frame while active */
+}
+@media (max-width:860px){
+  /* Same fix as the @supports mobile block above, mirrored for the JS
+     fallback path: .ritual must span the full track height so .steps has
+     room to stay stuck for the whole scroll-through. */
+  html[data-scrub="fallback"] #ritual .ritual{position:static;height:calc(var(--step-count, 4) * 100vh);display:block;padding:60px 8vw 0;}
+  html[data-scrub="fallback"] #ritual .steps{position:sticky;top:0;height:100vh;padding:0 8vw;}
+}
+@media (prefers-reduced-motion:reduce){
+  /* Collapse to the plain, unpinned list — the same "end state" the rest of
+     the motion layer resolves to. !important matches the precedence the
+     existing reduced-motion block already uses to beat the @supports/
+     data-scrub rules above regardless of source order. */
+  #ritual{height:auto !important;}
+  #ritual .ritual{position:static !important;height:auto !important;}
+  #ritual .steps{display:flex !important;}
+  #ritual .step{
+    grid-area:auto !important;position:static !important;
+    opacity:1 !important;transform:none !important;animation:none !important;
+  }
+}
+
 /* ---------- PRODUCT CARDS ---------- */
 .product-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
